@@ -23,36 +23,77 @@
 </head>
 <body class="{% block corpo_classe %}{% endblock %}">
 
-  <!-- ================= Introdução animada da marca (1ª visita na aba) ================= -->
-  {% if request.resolver_match.url_name == 'home' %}
-    <div class="intro-myller" id="introMyller" aria-hidden="true" role="presentation">
-      <div class="intro-conteudo">
-        <div class="intro-marca">
-          <img class="intro-logo" src="{% static 'img/logo-myller.png' %}" alt="" width="150" height="150" decoding="async">
-          <span class="intro-nome" aria-hidden="true"><span class="intro-letra">Y</span><span class="intro-letra">L</span><span class="intro-letra">L</span><span class="intro-letra">E</span><span class="intro-letra">R</span></span>
-        </div>
-        <span class="intro-assinatura" aria-hidden="true">Moda feminina premium</span>
+  <!-- ================= Introdução animada da marca (toda carga completa) ================= -->
+  <div class="intro-myller" id="introMyller" aria-hidden="true" role="presentation">
+    <div class="intro-conteudo">
+      <div class="intro-marca">
+        <img class="intro-logo" src="{% static 'img/logo-myller.png' %}" alt="" width="150" height="150" decoding="async">
+        <span class="intro-nome" aria-hidden="true"><span class="intro-letra">Y</span><span class="intro-letra">L</span><span class="intro-letra">L</span><span class="intro-letra">E</span><span class="intro-letra">R</span></span>
       </div>
+      <span class="intro-assinatura" aria-hidden="true">Moda feminina premium</span>
     </div>
-    <noscript><style>.intro-myller{display:none!important}</style></noscript>
-  {% endif %}
+  </div>
+  <noscript><style>.intro-myller{display:none!important}</style></noscript>
   <script>
-    /* Intro da marca: roda em todas as páginas para registrar a 1ª visita da aba.
-       Só existe markup da intro na home — em URL interna direta nada é exibido. */
+    /* Intro MYLLER: executa em toda carga completa, inclusive F5/Ctrl+R.
+       Links e formulários internos são marcados para não repetir a animação
+       quando a navegação é apenas entre páginas do próprio site. */
     (function () {
-      var CHAVE = "myller_intro_assistida";
+      var CHAVE = "myller_navegacao_interna";
+      var LIMITE_MS = 10000;
       var intro = document.getElementById("introMyller");
-      var assistida = false;
-      try { assistida = sessionStorage.getItem(CHAVE) === "1"; } catch (e) { assistida = true; }
-      if (!assistida) {
-        try { sessionStorage.setItem(CHAVE, "1"); } catch (e) { /* sem armazenamento: não repete nem insiste */ }
-      }
-      if (!intro) return; // página interna: apenas marca a visita
-      function encerrar() { if (intro && intro.parentNode) { intro.parentNode.removeChild(intro); } }
-      if (assistida) { encerrar(); return; } // já viu nesta aba: some sem animar
       var reduzido = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      setTimeout(encerrar, reduzido ? 1100 : 3000);
+
+      function marcarNavegacaoInterna() {
+        try { sessionStorage.setItem(CHAVE, String(Date.now())); } catch (e) { /* storage indisponível */ }
+      }
+      function mudouDePagina(href) {
+        try {
+          var url = new URL(href, window.location.href);
+          return url.origin === window.location.origin &&
+            (url.pathname !== window.location.pathname || url.search !== window.location.search);
+        } catch (e) { return false; }
+      }
+      document.addEventListener("click", function (evento) {
+        if (evento.defaultPrevented || evento.button !== 0) return;
+        if (evento.metaKey || evento.ctrlKey || evento.shiftKey || evento.altKey) return;
+        var link = evento.target.closest("a[href]");
+        if (!link || link.target === "_blank" || link.hasAttribute("download")) return;
+        var alvo = link.getAttribute("href");
+        if (!alvo || alvo.charAt(0) === "#") return;
+        if (mudouDePagina(link.href)) marcarNavegacaoInterna();
+      }, true);
+      document.addEventListener("submit", function (evento) {
+        var form = evento.target;
+        if (!form || form.target === "_blank") return;
+        if ((form.method || "get").toLowerCase() !== "get") return;
+        try {
+          var url = new URL(form.action || window.location.href, window.location.href);
+          if (url.origin === window.location.origin) marcarNavegacaoInterna();
+        } catch (e) { /* ação inválida: não marca */ }
+      }, true);
+
+      var tipo = "";
+      try {
+        var entradas = performance.getEntriesByType ? performance.getEntriesByType("navigation") : [];
+        if (entradas && entradas.length) tipo = entradas[0].type;
+        else if (performance.navigation) tipo = performance.navigation.type === 0 ? "navigate" : "reload";
+      } catch (e) { /* sem Navigation Timing: trata como carga nova */ }
+
+      var navegacaoInterna = false;
+      try {
+        var marcador = Number(sessionStorage.getItem(CHAVE) || 0);
+        sessionStorage.removeItem(CHAVE);
+        navegacaoInterna = marcador > 0 && (Date.now() - marcador) < LIMITE_MS;
+      } catch (e) { /* storage indisponível */ }
+      if (tipo === "reload") navegacaoInterna = false;
+
+      function encerrar() { if (intro && intro.parentNode) intro.parentNode.removeChild(intro); }
+
       window.addEventListener("pageshow", function (evento) { if (evento.persisted) encerrar(); });
+
+      if (!intro || tipo === "back_forward" || navegacaoInterna) { encerrar(); return; }
+      setTimeout(encerrar, reduzido ? 900 : 2500);
     })();
   </script>
 

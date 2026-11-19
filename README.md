@@ -275,7 +275,7 @@ PAYMENT_GATEWAY = none | mercadopago | stripe
 python manage.py test
 ```
 
-**Resultado: 171 testes, todos passando (0 falhas).**
+**Resultado: 223 testes, todos passando (0 falhas).**
 
 | App | Cobre |
 | --- | --- |
@@ -304,14 +304,16 @@ de desenvolvimento.
 2. **Serviço web**: no painel da Railway, crie um projeto → *New Service* →
    *Deploy from GitHub repo* → aponte para `myller-loja`.
    O build usa o `requirements.txt` automaticamente (Nixpacks).
-3. **PostgreSQL**: no mesmo projeto → *New Service* → *PostgreSQL*.
-   A Railway injeta `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`,
-   `POSTGRES_HOST` e `POSTGRES_PORT` no serviço web — o Django troca o
-   SQLite pelo PostgreSQL automaticamente quando `POSTGRES_DB` existe.
+3. **PostgreSQL**: no mesmo projeto → *New Service* → *PostgreSQL* e conecte
+   ao serviço web. A Railway injeta `DATABASE_URL` (com prioridade no Django)
+   e também `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`,
+   `POSTGRES_HOST` e `POSTGRES_PORT` como alternativa. Sem nenhuma dessas
+   variáveis o projeto continua usando SQLite apenas no desenvolvimento.
 4. **Variáveis de ambiente** (aba *Variables* do serviço web):
 
    | Variável | Obrigatória | Valor |
    | --- | --- | --- |
+   | `DATABASE_URL` | não | injetada automaticamente ao conectar o serviço PostgreSQL |
    | `DJANGO_SECRET_KEY` | **sim** | gere com<br>`python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` |
    | `DJANGO_DEBUG` | não | `False` (padrão já é `False` na Railway) |
    | `DJANGO_ALLOWED_HOSTS` | não | o domínio `*.up.railway.app` é detectado automaticamente; use para domínio próprio |
@@ -350,7 +352,8 @@ deploy (mídia demo versionada no Git + regenerada por
    (já inclui gunicorn, WhiteNoise, psycopg e Pillow).
 2. **`.env`**: `DJANGO_DEBUG=False`, `DJANGO_SECRET_KEY` forte,
    `DJANGO_ALLOWED_HOSTS` e `DJANGO_CSRF_TRUSTED_ORIGINS` com o domínio (`https://...`).
-3. **Banco**: preencha `POSTGRES_DB/USER/PASSWORD/HOST/PORT` para usar PostgreSQL.
+3. **Banco**: defina `DATABASE_URL` (recomendado) ou
+   `POSTGRES_DB/USER/PASSWORD/HOST/PORT` para usar PostgreSQL.
 4. **Migrar e coletar estáticos**:
    ```bash
    python manage.py migrate

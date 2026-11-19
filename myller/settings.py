@@ -130,20 +130,65 @@ TEMPLATES = [
 WSGI_APPLICATION = "myller.wsgi.application"
 
 # ---------------------------------------------------------------- Banco de dados
-# Produção: PostgreSQL via variáveis de ambiente. Desenvolvimento: SQLite.
-_db_name = os.getenv("POSTGRES_DB", "")
-if _db_name:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": _db_name,
-            "USER": os.getenv("POSTGRES_USER", ""),
-            "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
-            "HOST": os.getenv("POSTGRES_HOST", "localhost"),
-            "PORT": os.getenv("POSTGRES_PORT", "5432"),
-            "CONN_MAX_AGE": int(os.getenv("POSTGRES_CONN_MAX_AGE", "60")),
-        }
+# Produção: PostgreSQL via DATABASE_URL (Railway) ou POSTGRES_*.
+# Desenvolvimento: SQLite. Nenhuma credencial fica no código.
+def _config_banco_por_url(url):
+    """Converte a DATABASE_URL injetada pela Railway em config Django."""
+    from urllib.parse import parse_qsl, unquote, urlparse
+
+    parsed = urlparse(url.strip())
+    if parsed.scheme not in ("postgres", "postgresql", "postgresql+psycopg"):
+        raise ImproperlyConfigured(
+            "DATABASE_URL deve usar o esquema postgres:// ou postgresql://."
+        )
+    if not parsed.hostname or not parsed.path.strip("/"):
+        raise ImproperlyConfigured(
+            "DATABASE_URL está incompleta: faltam host ou nome do banco."
+        )
+
+    options = dict(parse_qsl(parsed.query))
+    if "sslmode" not in options and parsed.hostname not in {
+        "localhost",
+        "127.0.0.1",
+        "::1",
+    }:
+        # Provedores gerenciados (inclusive a Railway) exigem TLS na conexão.
+        options["sslmode"] = "require"
+
+    config = {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": unquote(parsed.path).lstrip("/"),
+        "USER": unquote(parsed.username or ""),
+        "PASSWORD": unquote(parsed.password or ""),
+        "HOST": parsed.hostname,
+        "PORT": str(parsed.port or "5432"),
+        "CONN_MAX_AGE": int(os.getenv("POSTGRES_CONN_MAX_AGE", "60")),
     }
+    if options:
+        config["OPTIONS"] = options
+    return config
+
+
+_database_url = os.getenv("DATABASE_URL", "").strip()
+_db_name = os.getenv("POSTGRES_DB", "")
+if _database_url:
+    DATABASES = {"default": _config_banco_por_url(_database_url)}
+elif _db_name:
+    _host_postgres = os.getenv("POSTGRES_HOST", "localhost")
+    _config_postgres = {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": _db_name,
+        "USER": os.getenv("POSTGRES_USER", ""),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+        "HOST": _host_postgres,
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
+        "CONN_MAX_AGE": int(os.getenv("POSTGRES_CONN_MAX_AGE", "60")),
+    }
+    if _host_postgres not in {"localhost", "127.0.0.1", "::1"}:
+        _config_postgres["OPTIONS"] = {
+            "sslmode": os.getenv("POSTGRES_SSLMODE", "require")
+        }
+    DATABASES = {"default": _config_postgres}
 else:
     DATABASES = {
         "default": {

@@ -600,7 +600,7 @@
     radial-gradient(circle at 50% 42%, rgba(149, 194, 223, 0.18), transparent 55%),
     radial-gradient(circle at 82% 84%, rgba(192, 183, 166, 0.22), transparent 45%),
     #FFFFFF;
-  animation: introSair 0.6s ease 2.4s forwards;
+  animation: introSair 0.5s ease 1.9s forwards;
 }
 
 @keyframes introSair {
@@ -627,7 +627,7 @@
   width: auto;
   opacity: 0;
   transform: scale(0.72);
-  animation: introSimbolo 0.85s cubic-bezier(0.22, 0.61, 0.36, 1) 0.15s forwards;
+  animation: introSimbolo 0.65s cubic-bezier(0.22, 0.61, 0.36, 1) 0.1s forwards;
 }
 
 @keyframes introSimbolo {
@@ -647,14 +647,14 @@
 .intro-letra {
   opacity: 0;
   transform: translateY(0.4em);
-  animation: introLetra 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  animation: introLetra 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 
-.intro-letra:nth-child(1) { animation-delay: 0.75s; }
-.intro-letra:nth-child(2) { animation-delay: 0.88s; }
-.intro-letra:nth-child(3) { animation-delay: 1.01s; }
-.intro-letra:nth-child(4) { animation-delay: 1.14s; }
-.intro-letra:nth-child(5) { animation-delay: 1.27s; }
+.intro-letra:nth-child(1) { animation-delay: 0.55s; }
+.intro-letra:nth-child(2) { animation-delay: 0.65s; }
+.intro-letra:nth-child(3) { animation-delay: 0.75s; }
+.intro-letra:nth-child(4) { animation-delay: 0.85s; }
+.intro-letra:nth-child(5) { animation-delay: 0.95s; }
 
 @keyframes introLetra {
   to { opacity: 1; transform: translateY(0); }
@@ -666,7 +666,7 @@
   letter-spacing: 0.42em;
   color: var(--bege);
   opacity: 0;
-  animation: introLetra 0.7s ease 1.55s forwards;
+  animation: introLetra 0.5s ease 1.2s forwards;
 }
 
 /* Topbar: links de contato oficiais */
@@ -930,7 +930,7 @@ a.linha-atendimento:hover { color: #fff; }
 
 /* ------------------------------------------ Movimento reduzido ----------- */
 @media (prefers-reduced-motion: reduce) {
-  .intro-myller { animation: introSair 0.01s linear 1.3s forwards; }
+  .intro-myller { animation: none !important; }
   .intro-logo, .intro-letra, .intro-assinatura {
     animation: none !important;
     opacity: 1 !important;

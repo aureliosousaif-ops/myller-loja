@@ -41,6 +41,10 @@ logs/
 dump*.sql
 pg_dump*
 
+# Auditoria / reconstrução — uso exclusivo local, nunca publicar
+.work/
+myller/settings_audit.py
+
 # Cobertura/testes
 .pytest_cache/
 .coverage

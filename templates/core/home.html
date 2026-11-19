@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}{{ loja.nome_loja }} — Moda feminina premium{% endblock %}
+
+{% block head_extra %}
+  <link href="{% static 'css/home.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block conteudo %}
+
+  <!-- ===================== Banner principal ===================== -->
+  <section class="hero hero-inicio">
+    {% if loja.banner_imagem %}
+      <div class="hero-foto" style="background-image:url('{{ loja.banner_imagem.url }}')"></div>
+    {% endif %}
+    <span class="hero-demo">Imagem demonstrativa</span>
+    <div class="container">
+      <div class="hero-conteudo">
+        <span class="hero-selo hero-anim" style="--i:0">Coleção feminina · {{ loja.nome_loja }}</span>
+        <h1 class="hero-titulo hero-anim" style="--i:1">{{ loja.banner_titulo|default:"SEU ESTILO, SUA ESSÊNCIA." }}</h1>
+        <p class="hero-subtitulo hero-anim" style="--i:2">{{ loja.banner_subtitulo|default:"Descubra peças que combinam com você. Vista sua personalidade com MYLLER." }}</p>
+
+        <div class="hero-acoes hero-anim" style="--i:3">
+          <a href="{{ loja.banner_botao_link|default:'/produtos/' }}" class="btn-myller btn-claro">
+            {{ loja.banner_botao_texto|default:"EXPLORAR COLEÇÃO" }} <i class="bi bi-arrow-right"></i>
+          </a>
+          <a href="{% url 'produtos:lista' %}?ordem=novidades" class="btn-ghost-claro">
+            CONHECER NOVIDADES
+          </a>
+        </div>
+
+        <div class="hero-estatisticas hero-anim" style="--i:4">
+          <div class="hero-estat"><strong>100%</strong><span>Pagamento seguro</span></div>
+          <div class="hero-estat"><strong>Brasil</strong><span>Entrega nacional</span></div>
+          <div class="hero-estat"><strong>Premium</strong><span>Qualidade MYLLER</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-rolagem" aria-hidden="true">Role</div>
+  </section>
+
+  <!-- ===================== Frase de apresentação ===================== -->
+  <section class="secao">
+    <div class="container">
+      <div class="frase-myller animar">
+        <div class="aspas">“</div>
+        <p>{{ loja.frase_apresentacao }}</p>
+        <div class="assinatura">— {{ loja.nome_loja }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Novidades (carrossel) ===================== -->
+  {% if novidades %}
+  <section class="secao sec-carrossel" style="padding-top:0">
+    <div class="container">
+      <div class="secao-cabecalho animar">
+        <div>
+          <div class="secao-selo">Recém-chegados</div>
+          <h2 class="secao-titulo">{{ loja.titulo_novidades|default:"Novidades" }}</h2>
+        </div>
+        <a href="{% url 'produtos:lista' %}?ordem=novidades" class="secao-link">Ver todos <i class="bi bi-arrow-right"></i></a>
+      </div>
+
+      <div class="carrossel-wrap animar" data-carrossel>
+        <button type="button" class="carrossel-nav anterior" data-dir="-1" aria-label="Anterior">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="carrossel-trilho">
+          {% for p in novidades %}{% include "includes/produto_card.html" with p=p %}{% endfor %}
+        </div>
+        <button type="button" class="carrossel-nav proximo" data-dir="1" aria-label="Próximo">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===================== Mais vendidos ===================== -->
+  {% if mais_vendidos %}
+  <section class="secao secao-alternada">
+    <div class="container">
+      <div class="secao-cabecalho animar">
+        <div>
+          <div class="secao-selo">Preferidas das clientes</div>
+          <h2 class="secao-titulo">{{ loja.titulo_mais_vendidos|default:"Mais vendidos da MYLLER" }}</h2>
+        </div>
+        <a href="{% url 'produtos:lista' %}?ordem=mais_vendidos" class="secao-link">Ver todos <i class="bi bi-arrow-right"></i></a>
+      </div>
+
+      <div class="grid-produtos">
+        {% for p in mais_vendidos %}{% include "includes/produto_card.html" with p=p %}{% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===================== Coleção feminina (editorial) ===================== -->
+  {% if categorias_home %}
+  <section class="secao">
+    <div class="container">
+      <div class="secao-cabecalho animar">
+        <div>
+          <div class="secao-selo">Curadoria da temporada</div>
+          <h2 class="secao-titulo">{{ loja.titulo_categorias|default:"Coleção feminina" }}</h2>
+        </div>
+        <a href="{% url 'produtos:lista' %}" class="secao-link">Explorar catálogo <i class="bi bi-arrow-right"></i></a>
+      </div>
+
+      <div class="grid-colecao">
+        {% for categoria in categorias_home|slice:":5" %}
+          <a href="{{ categoria.get_absolute_url }}" class="tile-colecao animar">
+            {% if categoria.imagem %}
+              <img src="{{ categoria.imagem.url }}" alt="{{ categoria.nome }}" loading="lazy">
+            {% endif %}
+            <span class="tile-seta"><i class="bi bi-arrow-up-right"></i></span>
+            <div class="tile-conteudo">
+              <span class="tile-selo">Coleção</span>
+              <h4>{{ categoria.nome }}</h4>
+              <span>{{ categoria.total_produtos }} peças disponíveis</span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===================== Categorias em destaque ===================== -->
+  {% if categorias_home %}
+  <section class="secao secao-alternada">
+    <div class="container">
+      <div class="secao-cabecalho animar">
+        <div>
+          <div class="secao-selo">Explore por categoria</div>
+          <h2 class="secao-titulo">Categorias em destaque</h2>
+        </div>
+        <a href="{% url 'produtos:lista' %}" class="secao-link">Todas as categorias <i class="bi bi-arrow-right"></i></a>
+      </div>
+
+      <div class="grid-categorias">
+        {% for categoria in categorias_home %}
+          <a href="{{ categoria.get_absolute_url }}" class="card-categoria animar">
+            {% if categoria.imagem %}
+              <img src="{{ categoria.imagem.url }}" alt="{{ categoria.nome }}" loading="lazy">
+            {% endif %}
+            <span class="cat-seta"><i class="bi bi-arrow-up-right"></i></span>
+            <div class="cat-conteudo">
+              {% if categoria.icone %}<div class="cat-icone"><i class="bi {{ categoria.icone }}"></i></div>{% endif %}
+              <h5>{{ categoria.nome }}</h5>
+              <span>{{ categoria.total_produtos }} produtos</span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===================== Ofertas especiais ===================== -->
+  {% if promocoes %}
+  <section class="secao">
+    <div class="container">
+      <div class="faixa-ofertas animar">
+        <div class="fo-conteudo">
+          <span class="fo-selo">Ofertas especiais</span>
+          <h3>{{ loja.titulo_promocoes|default:"Ofertas especiais" }} <strong>com desconto</strong></h3>
+          <p>Peças selecionadas da coleção com preço especial por tempo limitado — enquanto durar o estoque.</p>
+        </div>
+        <a href="{% url 'produtos:lista' %}?promocao=1&ordem=preco_asc" class="btn-myller">
+          Aproveitar ofertas <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="grid-produtos">
+        {% for p in promocoes %}{% include "includes/produto_card.html" with p=p %}{% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===================== Escolhas MYLLER (carrossel) ===================== -->
+  {% if escolhas %}
+  <section class="secao secao-alternada sec-carrossel">
+    <div class="container">
+      <div class="secao-cabecalho animar">
+        <div>
+          <div class="secao-selo">Seleção da marca</div>
+          <h2 class="secao-titulo">Escolhas <strong>{{ loja.nome_loja }}</strong></h2>
+        </div>
+        <a href="{% url 'produtos:lista' %}" class="secao-link">Ver coleção <i class="bi bi-arrow-right"></i></a>
+      </div>
+
+      <div class="carrossel-wrap animar" data-carrossel>
+        <button type="button" class="carrossel-nav anterior" data-dir="-1" aria-label="Anterior">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="carrossel-trilho">
+          {% for p in escolhas %}{% include "includes/produto_card.html" with p=p %}{% endfor %}
+        </div>
+        <button type="button" class="carrossel-nav proximo" data-dir="1" aria-label="Próximo">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- ===================== Benefícios ===================== -->
+  <section class="faixa-beneficios">
+    <div class="container">
+      <div class="grid-beneficios">
+        {% for beneficio in beneficios %}
+          <div class="beneficio animar">
+            <div class="beneficio-icone"><i class="bi {{ beneficio.icone }}"></i></div>
+            <div>
+              <h6>{{ beneficio.titulo }}</h6>
+              <p>{{ beneficio.texto }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== Depoimentos (fictícios) ===================== -->
+  <section class="secao secao-depoimentos">
+    <div class="container">
+      <div class="secao-cabecalho animar">
+        <div>
+          <div class="secao-selo">Quem veste MYLLER</div>
+          <h2 class="secao-titulo">Depoimentos</h2>
+        </div>
+      </div>
+
+      <span class="etiqueta-ficticio animar">
+        <i class="bi bi-info-circle"></i> Depoimentos fictícios — conteúdo de demonstração
+      </span>
+
+      <div class="grid-depoimentos">
+        <div class="depoimento-card animar">
+          <span class="estrelas">★★★★★</span>
+          <p>O vestido caiu perfeito e o tecido é ainda melhor do que nas fotos. A MYLLER virou minha primeira opção para eventos.</p>
+          <div class="depoimento-autor">
+            <div class="depoimento-avatar">C</div>
+            <div>
+              <strong>Camila R.</strong>
+              <span>Cliente fictícia · São Paulo/SP</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="depoimento-card animar">
+          <span class="estrelas">★★★★★</span>
+          <p>Comprei o conjunto Serena para o trabalho e recebi elogios o dia inteiro. Acabamento impecável e entrega rápida.</p>
+          <div class="depoimento-autor">
+            <div class="depoimento-avatar">L</div>
+            <div>
+              <strong>Letícia M.</strong>
+              <span>Cliente fictícia · Belo Horizonte/MG</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="depoimento-card animar">
+          <span class="estrelas">★★★★☆</span>
+          <p>Calça wide leg premium é o conforto mais elegante que já tive. Troquei de tamanho sem burocracia — atendimento nota dez.</p>
+          <div class="depoimento-autor">
+            <div class="depoimento-avatar">B</div>
+            <div>
+              <strong>Beatriz A.</strong>
+              <span>Cliente fictícia · Curitiba/PR</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SIGA A MYLLER ===================== -->
+  <section class="secao secao-siga">
+    <div class="container">
+      <div class="siga-cartao animar">
+        <div class="siga-conteudo">
+          <span class="siga-icone"><i class="bi bi-instagram"></i></span>
+          <div class="secao-selo siga-selo">Redes sociais</div>
+          <h2 class="siga-titulo">SIGA A MYLLER</h2>
+          <p class="siga-texto">Fique por dentro das novidades, inspirações e coleções da MYLLER.</p>
+          <a href="{{ loja.instagram_url }}" target="_blank" rel="noopener" class="btn-myller siga-botao">
+            ACOMPANHAR NO INSTAGRAM <i class="bi bi-arrow-up-right"></i>
+          </a>
+          <span class="siga-perfil"><i class="bi bi-instagram"></i> @myller_my</span>
+        </div>
+        <div class="siga-visual" aria-hidden="true">
+          <img src="{% static 'img/logo-myller-clara.png' %}" alt="" class="siga-logo">
+          <span class="siga-arco siga-arco-1"></span>
+          <span class="siga-arco siga-arco-2"></span>
+          <span class="siga-arco siga-arco-3"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}
+
+{% block newsletter %}
+  <!-- ===================== Newsletter ===================== -->
+  <section class="newsletter">
+    <div class="container">
+      <div class="newsletter-inner">
+        <div>
+          <h3>{{ loja.newsletter_titulo }}</h3>
+          <p>{{ loja.newsletter_texto }}</p>
+        </div>
+        <form action="{% url 'core:newsletter' %}" method="post" class="newsletter-form">
+          {% csrf_token %}
+          <input type="email" name="email" placeholder="Seu melhor e-mail" required aria-label="E-mail para newsletter">
+          <button type="submit" class="btn-myller btn-claro">Quero receber</button>
+        </form>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'js/home.js' %}" defer></script>
+{% endblock %}

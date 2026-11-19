@@ -1,0 +1,96 @@
+{% extends "produtos/lista.html" %}
+
+{% block titulo %}{% if termo %}Busca: {{ termo }}{% else %}Busca{% endif %} — {{ loja.nome_loja }}{% endblock %}
+
+{% block conteudo %}
+<div class="pagina-catalogo">
+  <div class="container">
+
+    <nav class="caminho" aria-label="Navegação estrutural">
+      <a href="{% url 'core:home' %}">Início</a>
+      <i class="bi bi-chevron-right mx-1"></i> Busca
+    </nav>
+
+    <div class="cabecalho-pagina">
+      <div class="secao-selo">Resultados</div>
+      <h1 class="secao-titulo">{% if termo %}"{{ termo }}"{% else %}Buscar produtos{% endif %}</h1>
+      <p class="secao-subtitulo">
+        {% if termo %}{{ produtos|length }} resultado{{ produtos|length|pluralize:"s" }} encontrado{{ produtos|length|pluralize:"s" }}.
+        {% else %}Digite um termo na barra de busca do topo para encontrar produtos.{% endif %}
+      </p>
+    </div>
+
+    <div class="catalogo-layout">
+      <aside class="filtros">
+        <form method="get" id="formFiltros">
+          {% if request.GET.q %}<input type="hidden" name="q" value="{{ request.GET.q }}">{% endif %}
+          {% if request.GET.ordem %}<input type="hidden" name="ordem" value="{{ request.GET.ordem }}">{% endif %}
+
+          <div class="filtro-grupo">
+            <div class="filtro-titulo">Tamanho</div>
+            <div class="chips-tamanhos">
+              {% for tamanho in todos_tamanhos %}
+                <label class="chip-filtro {% if tamanho.nome in tamanhos_selecionados %}ativo{% endif %}">
+                  <input type="checkbox" name="tamanho" value="{{ tamanho.nome }}"
+                         class="d-none" {% if tamanho.nome in tamanhos_selecionados %}checked{% endif %}
+                         onchange="this.form.submit()">
+                  {{ tamanho.nome }}
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="filtro-grupo">
+            <div class="filtro-titulo">Cor</div>
+            {% for cor in todas_cores %}
+              <label class="filtro-opcao">
+                <input type="checkbox" name="cor" value="{{ cor.nome }}"
+                       {% if cor.nome in cores_selecionadas %}checked{% endif %}
+                       onchange="this.form.submit()">
+                <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:{{ cor.codigo_hex }};border:1px solid rgba(0,0,0,0.15)"></span>
+                {{ cor.nome }}
+              </label>
+            {% endfor %}
+          </div>
+
+          <div class="filtro-grupo d-grid gap-2">
+            <button type="submit" class="btn-myller btn-pequeno">Aplicar filtros</button>
+            <a href="{% url 'produtos:busca' %}" class="btn-outline-myller btn btn-pequeno text-center">Limpar</a>
+          </div>
+        </form>
+      </aside>
+
+      <div>
+        <div class="barra-catalogo">
+          <span class="contagem-produtos">{{ produtos|length }} produto{{ produtos|length|pluralize:"s" }}</span>
+          <form method="get" class="ordenacao">
+            {% if request.GET.q %}<input type="hidden" name="q" value="{{ request.GET.q }}">{% endif %}
+            {% for t in tamanhos_selecionados %}<input type="hidden" name="tamanho" value="{{ t }}">{% endfor %}
+            {% for c in cores_selecionadas %}<input type="hidden" name="cor" value="{{ c }}">{% endfor %}
+            <label>Ordenar por</label>
+            <select name="ordem" class="form-select" onchange="this.form.submit()">
+              <option value="">Relevância</option>
+              {% for chave, rotulo in ordenacoes.items %}
+                <option value="{{ chave }}" {% if request.GET.ordem == chave %}selected{% endif %}>{{ rotulo }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </div>
+
+        {% if produtos %}
+          <div class="grid-produtos">
+            {% for p in produtos %}{% include "includes/produto_card.html" with p=p %}{% endfor %}
+          </div>
+        {% else %}
+          <div class="carrinho-vazio">
+            <div class="icone"><i class="bi bi-search"></i></div>
+            <h2>Nada encontrado</h2>
+            <p class="text-muted">Verifique a grafia ou explore o catálogo completo.</p>
+            <a href="{% url 'produtos:lista' %}" class="btn-myller mt-2">Ver catálogo</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

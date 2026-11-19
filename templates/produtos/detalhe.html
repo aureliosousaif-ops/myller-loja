@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}{{ produto.nome }} — {{ loja.nome_loja }}{% endblock %}
+{% block descricao %}{{ produto.resumo|default:produto.descricao|truncatewords:30 }}{% endblock %}
+
+{% block head_extra %}
+  <link href="{% static 'css/produtos.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block conteudo %}
+<div class="produto-detalhe">
+  <div class="container">
+
+    <nav class="caminho" aria-label="Navegação estrutural">
+      <a href="{% url 'core:home' %}">Início</a>
+      <i class="bi bi-chevron-right mx-1"></i>
+      <a href="{{ produto.categoria.get_absolute_url }}">{{ produto.categoria.nome }}</a>
+      <i class="bi bi-chevron-right mx-1"></i>
+      {{ produto.nome }}
+    </nav>
+
+    <div class="produto-layout mt-3">
+
+      <!-- ================= Galeria ================= -->
+      <div class="galeria">
+        <div class="galeria-principal" id="galeriaPrincipal" title="Clique para ampliar">
+          {% if produto.imagem_principal %}
+            <img src="{{ produto.imagem_principal.url }}" alt="{{ produto.nome }}" id="imgPrincipal">
+          {% else %}
+            <img src="{% static 'img/placeholder-produto.svg' %}" alt="{{ produto.nome }}" id="imgPrincipal">
+          {% endif %}
+          <span class="lente-zoom"><i class="bi bi-zoom-in"></i></span>
+        </div>
+        <div class="dica-zoom"><i class="bi bi-zoom-in"></i> Clique na imagem para ativar o zoom</div>
+
+        {% if produto.imagens.count > 1 %}
+          <div class="miniaturas">
+            {% for imagem in produto.imagens.all %}
+              <button type="button" class="miniatura {% if forloop.first %}ativa{% endif %}"
+                      data-src="{{ imagem.imagem.url }}" aria-label="Imagem {{ forloop.counter }}">
+                <img src="{{ imagem.imagem.url }}" alt="{{ imagem.texto_alt }}" loading="lazy">
+              </button>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- ================= Informações ================= -->
+      <div class="produto-info">
+        <span class="p-categoria">{{ produto.categoria.nome }}</span>
+        <h1>{{ produto.nome }}</h1>
+
+        {% if produto.demonstracao %}
+          <span class="selo-demo-produto">
+            <i class="bi bi-info-circle"></i> Produto demonstrativo — imagem e estoque fictícios
+          </span>
+        {% endif %}
+
+        <div class="avaliacao-linha">
+          {% if produto.total_avaliacoes %}
+            <span class="estrelas">{% for i in "12345" %}{% if forloop.counter <= nota_media %}★{% else %}☆{% endif %}{% endfor %}</span>
+            <span>{{ nota_media|floatformat:1 }} · {{ produto.total_avaliacoes }} avaliação{{ produto.total_avaliacoes|pluralize }}</span>
+          {% else %}
+            <span class="estrelas">☆☆☆☆☆</span>
+            <span>Seja o primeiro a avaliar</span>
+          {% endif %}
+          <span>·</span>
+          <span><i class="bi bi-box-seam me-1"></i>SKU: {{ produto.sku }}</span>
+        </div>
+
+        <div class="p-preco-bloco">
+          <div>
+            <span class="p-preco-valor" id="precoUnitario">R$ {{ produto.preco_final|floatformat:2 }}</span>
+            {% if produto.em_promocao %}
+              <span class="p-preco-antigo">R$ {{ produto.preco|floatformat:2 }}</span>
+              <span class="p-desconto-selo">-{{ produto.percentual_desconto }}%</span>
+            {% endif %}
+          </div>
+          <div class="p-parcela">
+            em até <strong>3x de R$ {{ produto.preco_final|floatformat:2 }}</strong> sem juros ·
+            <strong>10% de desconto</strong> no PIX
+          </div>
+        </div>
+
+        {% if produto.resumo %}<p style="color:var(--texto);margin-bottom:1.3rem">{{ produto.resumo }}</p>{% endif %}
+
+        <form method="post" action="{% url 'carrinho:adicionar' %}" id="formAddCarrinho">
+          {% csrf_token %}
+          <input type="hidden" name="variacao_id" id="variacaoId">
+          <input type="hidden" name="produto_slug" value="{{ produto.slug }}">
+          <input type="hidden" name="next" value="{{ request.path }}">
+
+          {% if produto.tamanhos_disponiveis %}
+            <div class="grupo-selecao">
+              <div class="rotulo">Tamanho <span class="valor-rotulo" id="rotuloTamanho">Selecione</span></div>
+              <div class="chips-selecao" id="selecaoTamanho">
+                {% for tamanho in produto.tamanhos_disponiveis %}
+                  <button type="button" class="chip-selecao" data-tamanho="{{ tamanho.nome }}">{{ tamanho.nome }}</button>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if produto.cores_disponiveis %}
+            <div class="grupo-selecao">
+              <div class="rotulo">Cor <span class="valor-rotulo" id="rotuloCor">Selecione</span></div>
+              <div class="chips-selecao" id="selecaoCor">
+                {% for cor in produto.cores_disponiveis %}
+                  <button type="button" class="chip-selecao chip-cor" data-cor="{{ cor.nome }}"
+                          style="background-color: {{ cor.codigo_hex }}" title="{{ cor.nome }}"
+                          aria-label="{{ cor.nome }}"></button>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="grupo-selecao">
+            <div class="rotulo">Quantidade</div>
+            <div class="qtd-controle">
+              <button type="button" id="diminuiQtd" aria-label="Diminuir">−</button>
+              <input type="number" name="quantidade" id="quantidade" value="1" min="1" max="{{ produto.estoque_total|default:1 }}">
+              <button type="button" id="aumentaQtd" aria-label="Aumentar">+</button>
+            </div>
+          </div>
+
+          <div id="avisoEstoque" class="aviso-estoque mb-3" style="display:none"></div>
+
+          <div class="linha-acoes-produto">
+            <button type="submit" class="btn-myller btn-add-principal" id="btnAddCarrinho" {% if produto.estoque_total == 0 %}disabled{% endif %}>
+              <i class="bi bi-bag-plus"></i>
+              {% if produto.estoque_total == 0 %}Produto esgotado{% else %}Adicionar ao carrinho{% endif %}
+            </button>
+            <button type="button" class="btn-fav-produto {% if favoritado %}ativo{% endif %}"
+                    data-favorito="{{ produto.pk }}" aria-label="Favoritar" title="Favoritar">
+              <i class="bi bi-heart{% if favoritado %}-fill{% endif %}"></i>
+            </button>
+          </div>
+        </form>
+
+        <div class="entrega-info">
+          <div class="linha-entrega">
+            <i class="bi bi-truck"></i>
+            <div>
+              <strong>Entrega para todo o Brasil</strong>
+              <span>Frete e prazo calculados no carrinho pelo seu CEP</span>
+            </div>
+          </div>
+          <div class="linha-entrega">
+            <i class="bi bi-shield-check"></i>
+            <div>
+              <strong>Pagamento 100% seguro</strong>
+              <span>PIX ou cartão via gateway reconhecido — 10% off no PIX</span>
+            </div>
+          </div>
+          <div class="linha-entrega">
+            <i class="bi bi-arrow-repeat"></i>
+            <div>
+              <strong>Trocas em até 7 dias</strong>
+              <span>Simples e sem burocracia após o recebimento</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= Abas ================= -->
+        <div class="abas-produto">
+          <div class="nav-abas" role="tablist">
+            <button type="button" class="nav-aba ativa" data-aba="descricao">Descrição</button>
+            <button type="button" class="nav-aba" data-aba="avaliacoes">Avaliações ({{ produto.total_avaliacoes }})</button>
+          </div>
+
+          <div class="conteudo-aba ativa" id="aba-descricao">
+            <p>{{ produto.descricao }}</p>
+          </div>
+
+          <div class="conteudo-aba" id="aba-avaliacoes">
+            <div class="mb-4">
+              {% for avaliacao in avaliacoes %}
+                <div class="avaliacao-card">
+                  <div class="avaliacao-topo">
+                    <span class="avaliacao-autor">
+                      {{ avaliacao.cliente.nome_exibicao }}
+                      <span class="estrelas ms-2">{% for i in "12345" %}{% if forloop.counter <= avaliacao.nota %}★{% else %}☆{% endif %}{% endfor %}</span>
+                    </span>
+                    <span class="avaliacao-data">{{ avaliacao.criado_em|date:"d/m/Y" }}</span>
+                  </div>
+                  <p>{{ avaliacao.comentario }}</p>
+                </div>
+              {% empty %}
+                <p class="text-muted">Ainda não há avaliações para este produto.</p>
+              {% endfor %}
+            </div>
+
+            {% if user.is_authenticated %}
+              <form method="post" action="{% url 'produtos:avaliar' produto.slug %}" class="form-avaliacao">
+                {% csrf_token %}
+                <h6 class="mb-3">Avalie este produto</h6>
+                <div class="seletor-nota mb-3">
+                  <input type="radio" name="nota" id="nota5" value="5" checked><label for="nota5" title="5 estrelas">★</label>
+                  <input type="radio" name="nota" id="nota4" value="4"><label for="nota4" title="4 estrelas">★</label>
+                  <input type="radio" name="nota" id="nota3" value="3"><label for="nota3" title="3 estrelas">★</label>
+                  <input type="radio" name="nota" id="nota2" value="2"><label for="nota2" title="2 estrelas">★</label>
+                  <input type="radio" name="nota" id="nota1" value="1"><label for="nota1" title="1 estrela">★</label>
+                </div>
+                <textarea name="comentario" class="form-control mb-3" rows="3" required
+                          placeholder="Conte como foi sua experiência com o produto..."></textarea>
+                <button type="submit" class="btn-myller btn-pequeno">Publicar avaliação</button>
+              </form>
+            {% else %}
+              <div class="form-avaliacao text-center">
+                <p class="mb-2" style="color:var(--texto)">Avalie este produto com a sua conta MYLLER.</p>
+                <a href="{% url 'usuarios:login' %}?next={{ request.path }}" class="btn-myller btn-pequeno">Entrar para avaliar</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= Relacionados ================= -->
+    {% if relacionados %}
+      <section class="secao secao-relacionados" style="padding-bottom:0">
+        <div class="secao-cabecalho animar">
+          <div>
+            <div class="secao-selo">Combine com</div>
+            <h2 class="secao-titulo">Produtos <strong>relacionados</strong></h2>
+          </div>
+          <a href="{{ produto.categoria.get_absolute_url }}" class="secao-link">
+            Ver {{ produto.categoria.nome }} <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+        <div class="grid-produtos">
+          {% for p in relacionados %}{% include "includes/produto_card.html" with p=p %}{% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+  </div>
+</div>
+
+{{ mapa_variacoes|json_script:"mapaVariacoes" }}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.MYLLER_PRODUTO = {
+    slug: "{{ produto.slug }}",
+    estoqueTotal: {{ produto.estoque_total|default:0 }},
+    precoBase: "{{ produto.preco_final }}"
+  };
+</script>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Recuperar senha — {{ loja.nome_loja }}{% endblock %}
+
+{% block conteudo %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">
+      {% if loja.logo %}<img src="{{ loja.logo.url }}" alt="{{ loja.nome_loja }}">
+      {% else %}<img src="{% static 'img/logo-myller.png' %}" alt="{{ loja.nome_loja }}">{% endif %}
+    </div>
+
+    <h1>Esqueceu a senha?</h1>
+    <p class="subtitulo">Informe o e-mail da sua conta e enviaremos um link para redefinir.</p>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.email.id_for_label }}">E-mail</label>
+        {{ form.email }}
+        {% for erro in form.email.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+      </div>
+      <button type="submit" class="btn-myller w-100" style="padding:0.85rem">Enviar link</button>
+    </form>
+
+    <div class="auth-rodape">
+      <a href="{% url 'usuarios:login' %}"><i class="bi bi-arrow-left"></i> Voltar ao login</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

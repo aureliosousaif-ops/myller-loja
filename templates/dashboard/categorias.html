@@ -1,0 +1,73 @@
+{% extends "dashboard/base_painel.html" %}
+
+{% block titulo %}Categorias{% endblock %}
+{% block topo_titulo %}Categorias{% endblock %}
+{% block topo_subtitulo %}Organize o catálogo por categorias e subcategorias{% endblock %}
+
+{% block conteudo %}
+<section class="painel-cartao">
+  <div class="painel-cartao-topo">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <h3>Categorias</h3>
+      <span class="kpi-detalhe">{{ categorias|length }} categoria(s)</span>
+    </div>
+    <a href="{% url 'dashboard:categoria_nova' %}" class="btn-painel btn-pequeno">
+      <i class="bi bi-plus-lg"></i> Nova categoria
+    </a>
+  </div>
+
+  <div class="painel-cartao-corpo sem-padding">
+    <table class="tabela-painel">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Categoria pai</th>
+          <th>Slug</th>
+          <th class="num">Ordem</th>
+          <th class="num">Produtos</th>
+          <th>Na home</th>
+          <th>Status</th>
+          <th class="num">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in categorias %}
+        <tr>
+          <td><strong>{{ c.nome }}</strong></td>
+          <td>{% if c.pai %}{{ c.pai.nome }}{% else %}—{% endif %}</td>
+          <td>{{ c.slug }}</td>
+          <td class="num">{{ c.ordem }}</td>
+          <td class="num">{{ c.total_produtos }}</td>
+          <td>{% if c.mostrar_home %}Sim{% else %}Não{% endif %}</td>
+          <td>
+            <span class="badge-status {% if c.ativa %}bs-ativo{% else %}bs-inativo{% endif %}">
+              {% if c.ativa %}Ativa{% else %}Inativa{% endif %}
+            </span>
+          </td>
+          <td class="num">
+            <div class="d-flex gap-2 justify-content-end flex-wrap">
+              <a href="{% url 'dashboard:categoria_editar' c.pk %}" class="btn-painel btn-secundario btn-pequeno">Editar</a>
+              <form method="post" action="{% url 'dashboard:categoria_excluir' c.pk %}" class="d-inline" data-confirm="Excluir a categoria {{ c.nome }}?">
+                {% csrf_token %}
+                <button type="submit" class="btn-painel btn-perigo btn-pequeno">Excluir</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8">
+            <div class="estado-vazio">
+              <i class="bi bi-tags"></i>
+              <h4>Nenhuma categoria</h4>
+              <p>Crie a primeira categoria para organizar os produtos da loja.</p>
+              <a href="{% url 'dashboard:categoria_nova' %}" class="btn-painel"><i class="bi bi-plus-lg"></i> Nova categoria</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "dashboard/base_painel.html" %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block topo_titulo %}{{ titulo }}{% endblock %}
+{% block topo_subtitulo %}Preencha os campos abaixo e salve{% endblock %}
+
+{% block conteudo %}
+<section class="painel-cartao">
+  <div class="painel-cartao-topo">
+    <h3>{{ titulo }}</h3>
+  </div>
+  <div class="painel-cartao-corpo">
+    <form method="post" enctype="multipart/form-data" class="painel-form">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="painel-alerta painel-alerta-error mb-3">
+        <i class="bi bi-x-circle-fill"></i>
+        <span>{% for erro in form.non_field_errors %}{{ erro }}{% endfor %}</span>
+      </div>
+      {% endif %}
+
+      {% for field in form %}
+        {% if field.is_hidden %}
+          {{ field }}
+        {% elif field.field.widget.input_type == "checkbox" %}
+        <div class="form-check mb-3">
+          {{ field }}
+          <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {% if field.errors %}
+          <div class="invalid-feedback d-block">{% for erro in field.errors %}{{ erro }}{% endfor %}</div>
+          {% endif %}
+        </div>
+        {% else %}
+        <div class="mb-3">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+          <div class="invalid-feedback d-block">{% for erro in field.errors %}{{ erro }}{% endfor %}</div>
+          {% endif %}
+          {% if field.help_text %}
+          <div class="helptext">{{ field.help_text }}</div>
+          {% endif %}
+        </div>
+        {% endif %}
+      {% endfor %}
+
+      <div class="barra-formulario">
+        <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="btn-painel btn-secundario">Voltar</a>
+        <button type="submit" class="btn-painel"><i class="bi bi-check-lg"></i> {{ acao|default:"Salvar" }}</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% load static %}
+{# Card de produto premium — recebe `p` (objeto Produto) #}
+<article class="card-produto animar">
+  <div class="card-media">
+    <div class="selos-card">
+      {% if p.em_promocao %}<span class="selo selo-promo">-{{ p.percentual_desconto }}%</span>{% endif %}
+      {% if p.eh_novidade %}<span class="selo selo-novo selo-lancamento">Lançamento</span>{% endif %}
+      {% if p.destaque_home and not p.em_promocao and not p.eh_novidade %}<span class="selo selo-destaque">Destaque</span>{% endif %}
+      {% if p.estoque_total == 0 %}<span class="selo selo-esgotado">Esgotado</span>{% endif %}
+    </div>
+
+    <button type="button"
+            class="btn-favoritar {% if p.pk in favoritos_ids %}ativo{% endif %}"
+            data-favorito="{{ p.pk }}"
+            aria-label="Favoritar {{ p.nome }}"
+            title="Favoritar">
+      <i class="bi bi-heart{% if p.pk in favoritos_ids %}-fill{% endif %}"></i>
+    </button>
+
+    <a href="{{ p.get_absolute_url }}" class="link-media" aria-label="{{ p.nome }}">
+      {% if p.imagem_principal %}
+        <img class="card-img-principal"
+             src="{{ p.imagem_principal.url }}"
+             alt="{{ p.nome }}"
+             loading="lazy"
+             width="450" height="562">
+        {% if p.imagem_secundaria %}
+          <img class="card-img-secundaria"
+               src="{{ p.imagem_secundaria.url }}"
+               alt="{{ p.nome }} — detalhe"
+               loading="lazy"
+               width="450" height="562">
+        {% endif %}
+      {% else %}
+        <img class="card-img-principal"
+             src="{% static 'img/placeholder-produto.svg' %}"
+             alt="{{ p.nome }}"
+             loading="lazy">
+      {% endif %}
+    </a>
+
+    <div class="card-acoes">
+      <button type="button"
+              class="btn-compra-rapida"
+              data-opcoes="{{ p.id_opcoes }}"
+              data-produto="{{ p.get_absolute_url }}"
+              {% if p.estoque_total == 0 %}disabled{% endif %}>
+        <i class="bi bi-bag-plus"></i>
+        {% if p.estoque_total == 0 %}Esgotado{% else %}Compra rápida{% endif %}
+      </button>
+      <a href="{{ p.get_absolute_url }}" class="btn-add-carrinho">
+        {% if p.estoque_total == 0 %}Avise-me{% else %}Ver produto{% endif %}
+      </a>
+    </div>
+  </div>
+
+  <div class="card-corpo">
+    <span class="card-categoria-produto">{{ p.categoria.nome }}</span>
+    <h3 class="card-titulo"><a href="{{ p.get_absolute_url }}">{{ p.nome }}</a></h3>
+
+    {% with cores=p.cores_card %}
+      {% if cores %}
+        <div class="cores-card" aria-label="Cores disponíveis">
+          {% for cor in cores|slice:":4" %}
+            <span class="mini-cor" style="background:{{ cor.hex }}" title="{{ cor.nome }}"></span>
+          {% endfor %}
+          {% if cores|length > 4 %}<span class="mais-cores">+{{ cores|length|add:"-4" }}</span>{% endif %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if p.total_avaliacoes %}
+      <div class="card-avaliacao">
+        <span class="estrelas">{% for i in "12345" %}{% if forloop.counter <= p.nota_media|default:0 %}★{% else %}☆{% endif %}{% endfor %}</span>
+        <span>({{ p.total_avaliacoes }})</span>
+      </div>
+    {% endif %}
+
+    <div class="card-preco">
+      <span class="preco">R$ {{ p.preco_final|floatformat:2 }}</span>
+      {% if p.em_promocao %}
+        <span class="preco-antigo">R$ {{ p.preco|floatformat:2 }}</span>
+      {% endif %}
+    </div>
+    <span class="preco-parcela">ou 3x de R$ {{ p.preco_final|floatformat:2 }} sem juros</span>
+  </div>
+</article>
+
+{{ p.opcoes_rapidas|json_script:p.id_opcoes }}

@@ -1,0 +1,13 @@
+{% autoescape off %}
+Olá {{ user.get_full_name|default:user.username }},
+
+Alguém solicitou a redefinição da senha da sua conta na {{ loja|default:"MYLLER" }}.
+
+Para criar uma nova senha, acesse o link abaixo:
+
+{{ protocol }}://{{ domain }}{% url 'usuarios:password_reset_confirm' uidb64=uid token=token %}
+
+Se não foi você quem solicitou, ignore este e-mail — sua senha permanece inalterada.
+
+Equipe MYLLER
+{% endautoescape %}

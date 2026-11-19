@@ -1,0 +1,85 @@
+{% extends "dashboard/base_painel.html" %}
+
+{% block titulo %}Cupons{% endblock %}
+{% block topo_titulo %}Cupons de desconto{% endblock %}
+{% block topo_subtitulo %}Crie e gerencie cupons promocionais da loja{% endblock %}
+
+{% block conteudo %}
+<section class="painel-cartao">
+  <div class="painel-cartao-topo">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <h3>Cupons</h3>
+      <span class="kpi-detalhe">{{ cupons|length }} cupom(ns)</span>
+    </div>
+    <a href="{% url 'dashboard:cupom_novo' %}" class="btn-painel btn-pequeno">
+      <i class="bi bi-plus-lg"></i> Novo cupom
+    </a>
+  </div>
+
+  <div class="painel-cartao-corpo sem-padding">
+    <table class="tabela-painel">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Tipo</th>
+          <th class="num">Valor</th>
+          <th class="num">Pedido mínimo</th>
+          <th>Validade</th>
+          <th class="num">Usos</th>
+          <th>Status</th>
+          <th class="num">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in cupons %}
+        <tr>
+          <td><strong>{{ c.codigo }}</strong></td>
+          <td>{{ c.get_tipo_display }}</td>
+          <td class="num">
+            {% if c.tipo == 'percentual' %}{{ c.valor }}%{% else %}R$ {{ c.valor|floatformat:2 }}{% endif %}
+          </td>
+          <td class="num">R$ {{ c.pedido_minimo|floatformat:2 }}</td>
+          <td>
+            {% if c.inicio and c.fim %}
+              {{ c.inicio|date:"d/m/Y" }} — {{ c.fim|date:"d/m/Y" }}
+            {% elif c.fim %}
+              Até {{ c.fim|date:"d/m/Y" }}
+            {% elif c.inicio %}
+              A partir de {{ c.inicio|date:"d/m/Y" }}
+            {% else %}
+              Sem prazo
+            {% endif %}
+          </td>
+          <td class="num">{{ c.usos }}/{{ c.usos_max|default:"∞" }}</td>
+          <td>
+            <span class="badge-status {% if c.ativo %}bs-ativo{% else %}bs-inativo{% endif %}">
+              {% if c.ativo %}Ativo{% else %}Inativo{% endif %}
+            </span>
+          </td>
+          <td class="num">
+            <div class="d-flex gap-2 justify-content-end flex-wrap">
+              <a href="{% url 'dashboard:cupom_editar' c.pk %}" class="btn-painel btn-secundario btn-pequeno">Editar</a>
+              <form method="post" action="{% url 'dashboard:cupom_excluir' c.pk %}" class="d-inline" data-confirm="Excluir o cupom {{ c.codigo }}?">
+                {% csrf_token %}
+                <button type="submit" class="btn-painel btn-perigo btn-pequeno">Excluir</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8">
+            <div class="estado-vazio">
+              <i class="bi bi-ticket-perforated"></i>
+              <h4>Nenhum cupom criado</h4>
+              <p>Crie cupons de percentual ou valor fixo para incentivar as compras.</p>
+              <a href="{% url 'dashboard:cupom_novo' %}" class="btn-painel"><i class="bi bi-plus-lg"></i> Novo cupom</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

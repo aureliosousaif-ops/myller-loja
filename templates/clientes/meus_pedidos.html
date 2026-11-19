@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Meus pedidos — {{ loja.nome_loja }}{% endblock %}
+
+{% block conteudo %}
+<div class="pagina-catalogo">
+  <div class="container">
+    <nav class="caminho">
+      <a href="{% url 'core:home' %}">Início</a>
+      <i class="bi bi-chevron-right mx-1"></i>
+      <a href="{% url 'clientes:perfil' %}">Minha conta</a>
+      <i class="bi bi-chevron-right mx-1"></i> Meus pedidos
+    </nav>
+
+    <div class="conta-layout mt-3">
+      {% include "includes/conta_menu.html" %}
+
+      <div class="conteudo-conta">
+        <h2>Meus pedidos</h2>
+
+        {% for pedido in pedidos %}
+          <a href="{% url 'pedidos:detalhe' pedido.numero %}" class="card-pedido" style="text-decoration:none;color:inherit">
+            <div>
+              <div class="numero-pedido">{{ pedido.numero }}</div>
+              <div class="meta-pedido">
+                {{ pedido.criado_em|date:"d/m/Y" }} · {{ pedido.total_itens }} item(ns)
+                {% if pedido.cupom %} · cupom {{ pedido.cupom.codigo }}{% endif %}
+              </div>
+            </div>
+            <span class="status-badge st-{{ pedido.status }}">{{ pedido.get_status_display }}</span>
+            <span class="total-pedido">R$ {{ pedido.total|floatformat:2 }}</span>
+          </a>
+        {% empty %}
+          <div class="estado-vazio">
+            <i class="bi bi-box-seam"></i>
+            <h4>Nenhum pedido por aqui</h4>
+            <p>Quando você fizer compras, elas aparecem nesta lista com o acompanhamento em tempo real.</p>
+            <a href="{% url 'produtos:lista' %}" class="btn-myller">Explorar produtos</a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

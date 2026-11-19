@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Pedido {{ pedido.numero }} recebido — {{ loja.nome_loja }}{% endblock %}
+
+{% block conteudo %}
+<div class="container">
+  <div class="confirmacao-wrap">
+
+    <div class="confirmacao-icone"><i class="bi bi-bag-check"></i></div>
+
+    <h1>Pedido recebido!</h1>
+    <p class="text-muted">
+      Obrigado por comprar com a <strong>{{ loja.nome_loja }}</strong>,
+      {% if pedido.nome %}{{ pedido.nome }}{% elif user.is_authenticated %}{{ user.first_name }}{% endif %}. Enviamos a confirmação para
+      <strong>{{ pedido.email }}</strong>.
+    </p>
+
+    <div class="pedido-numero">{{ pedido.numero }}</div>
+
+    <div class="bloco-checkout text-start">
+      <h5><span class="num">✓</span> Resumo</h5>
+      <div class="linha-resumo"><span>Itens</span><span>{{ pedido.total_itens }}</span></div>
+      <div class="linha-resumo"><span>Subtotal</span><span>R$ {{ pedido.subtotal|floatformat:2 }}</span></div>
+      {% if pedido.desconto %}<div class="linha-resumo desconto"><span>Desconto</span><span>- R$ {{ pedido.desconto|floatformat:2 }}</span></div>{% endif %}
+      <div class="linha-resumo"><span>Frete</span><span>R$ {{ pedido.frete|floatformat:2 }}</span></div>
+      <div class="linha-total"><span>Total</span><span class="valor">R$ {{ pedido.total|floatformat:2 }}</span></div>
+
+      <hr style="border-color:var(--bege);opacity:0.6">
+      <div class="linha-resumo"><span>Status atual</span>
+        <span class="status-badge st-{{ pedido.status }}">{{ pedido.get_status_display }}</span>
+      </div>
+      {% if pedido.prazo_entrega %}
+        <div class="linha-resumo"><span>Prazo estimado</span><span>{{ pedido.prazo_entrega }}</span></div>
+      {% endif %}
+      <div class="linha-resumo"><span>Entrega em</span>
+        <span style="text-align:right;max-width:60%">
+          {{ pedido.logradouro }}, {{ pedido.endereco_numero }} — {{ pedido.bairro }},
+          {{ pedido.cidade }}/{{ pedido.estado }} · CEP {{ pedido.cep }}
+        </span>
+      </div>
+    </div>
+
+    {% if mensagem_gateway %}
+      <div class="aviso-gateway text-start" style="justify-content:center">
+        <i class="bi bi-info-circle"></i>
+        <div>{{ mensagem_gateway }}</div>
+      </div>
+    {% endif %}
+
+    <div class="d-flex gap-3 justify-content-center flex-wrap mt-4">
+      <a href="{% url 'pedidos:detalhe' pedido.numero %}" class="btn-myller">
+        <i class="bi bi-search"></i> Acompanhar pedido
+      </a>
+      <a href="{% url 'produtos:lista' %}" class="btn-outline-myller btn">Continuar comprando</a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

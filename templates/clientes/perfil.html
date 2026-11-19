@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Minha conta — {{ loja.nome_loja }}{% endblock %}
+
+{% block conteudo %}
+<div class="pagina-catalogo">
+  <div class="container">
+    <nav class="caminho" aria-label="Navegação estrutural">
+      <a href="{% url 'core:home' %}">Início</a>
+      <i class="bi bi-chevron-right mx-1"></i> Minha conta
+    </nav>
+
+    <div class="cabecalho-pagina">
+      <div class="secao-selo">Painel do cliente</div>
+      <h1 class="secao-titulo">Olá, {{ user.first_name|default:user.username }}</h1>
+    </div>
+
+    <div class="conta-layout">
+      {% include "includes/conta_menu.html" %}
+
+      <div class="conteudo-conta">
+        <h2>Meus dados</h2>
+
+        <div class="row g-4 mb-4">
+          <div class="col-sm-6">
+            <div class="campo-info" style="background:var(--bege-claro)">
+              <div class="rotulo">Nome completo</div>
+              <div class="valor">{{ cliente.nome_exibicao }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="campo-info" style="background:var(--bege-claro)">
+              <div class="rotulo">E-mail</div>
+              <div class="valor">{{ user.email }}</div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="campo-info" style="background:var(--bege-claro)">
+              <div class="rotulo">Telefone</div>
+              <div class="valor">{{ cliente.telefone|default:"—" }}</div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="campo-info" style="background:var(--bege-claro)">
+              <div class="rotulo">CPF</div>
+              <div class="valor">{{ cliente.cpf|default:"—" }}</div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="campo-info" style="background:var(--bege-claro)">
+              <div class="rotulo">Cadastrado em</div>
+              <div class="valor">{{ cliente.criado_em|date:"d/m/Y" }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-sm-4">
+            <div class="campo-info">
+              <div class="rotulo">Pedidos realizados</div>
+              <div class="valor">{{ cliente.total_pedidos }}</div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="campo-info">
+              <div class="rotulo">Total investido</div>
+              <div class="valor">R$ {{ cliente.total_gasto|floatformat:2 }}</div>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="campo-info">
+              <div class="rotulo">Favoritos</div>
+              <div class="valor">{{ user.favoritos.count }}</div>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="mt-4">Pedidos recentes</h2>
+        {% for pedido in pedidos_recentes %}
+          <a href="{% url 'pedidos:detalhe' pedido.numero %}" class="card-pedido" style="text-decoration:none;color:inherit">
+            <div>
+              <div class="numero-pedido">{{ pedido.numero }}</div>
+              <div class="meta-pedido">{{ pedido.criado_em|date:"d/m/Y" }} · {{ pedido.total_itens }} item(ns)</div>
+            </div>
+            <span class="status-badge st-{{ pedido.status }}">{{ pedido.get_status_display }}</span>
+            <span class="total-pedido">R$ {{ pedido.total|floatformat:2 }}</span>
+          </a>
+        {% empty %}
+          <div class="estado-vazio" style="padding:1.5rem">
+            <p class="mb-2" style="color:var(--texto-suave)">Você ainda não fez nenhum pedido.</p>
+            <a href="{% url 'produtos:lista' %}" class="btn-myller btn-pequeno">Começar a comprar</a>
+          </div>
+        {% endfor %}
+
+        <div class="d-flex gap-2 flex-wrap mt-3">
+          <a href="{% url 'clientes:editar_perfil' %}" class="btn-outline-myller btn btn-pequeno">Editar perfil</a>
+          <a href="{% url 'clientes:meus_pedidos' %}" class="btn-outline-myller btn btn-pequeno">Ver todos os pedidos</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Criar conta — {{ loja.nome_loja }}{% endblock %}
+
+{% block conteudo %}
+<div class="auth-wrap">
+  <div class="auth-card wide">
+    <div class="auth-logo">
+      {% if loja.logo %}<img src="{{ loja.logo.url }}" alt="{{ loja.nome_loja }}">
+      {% else %}<img src="{% static 'img/logo-myller.png' %}" alt="{{ loja.nome_loja }}">{% endif %}
+    </div>
+
+    <h1>Crie sua conta</h1>
+    <p class="subtitulo">Cadastre-se para comprar, acompanhar pedidos e salvar favoritos.</p>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="aviso-estoque esgotado mb-3">
+          <i class="bi bi-exclamation-triangle"></i>
+          {% for erro in form.non_field_errors %}{{ erro }}{% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="row g-3 mb-3">
+        <div class="col-sm-6">
+          <label class="form-label" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+          {{ form.first_name }}
+          {% for erro in form.first_name.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+          {{ form.last_name }}
+          {% for erro in form.last_name.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+        {{ form.email }}
+        {% for erro in form.email.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+        {{ form.username }}
+        {% for erro in form.username.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-sm-6">
+          <label class="form-label" for="{{ form.telefone.id_for_label }}">{{ form.telefone.label }}</label>
+          {{ form.telefone }}
+          {% for erro in form.telefone.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+        </div>
+        <div class="col-sm-6">
+          <label class="form-label" for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+          <div class="campo-agrupado">
+            <i class="bi bi-lock icone-campo"></i>
+            {{ form.password1 }}
+            <button type="button" class="alternar-senha" data-alterna-senha="{{ form.password1.id_for_label }}"
+                    aria-label="Mostrar ou ocultar senha" aria-pressed="false" title="Mostrar ou ocultar senha">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+          {% for erro in form.password1.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+        <div class="campo-agrupado">
+          <i class="bi bi-lock icone-campo"></i>
+          {{ form.password2 }}
+          <button type="button" class="alternar-senha" data-alterna-senha="{{ form.password2.id_for_label }}"
+                  aria-label="Mostrar ou ocultar senha" aria-pressed="false" title="Mostrar ou ocultar senha">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+        {% for erro in form.password2.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+      </div>
+
+      <div class="form-check mb-3 termos-cadastro">
+        {{ form.aceite_termos }}
+        <label class="form-check-label" for="{{ form.aceite_termos.id_for_label }}">
+          Li e aceito os
+          <a href="{% url 'core:pagina' slug='termos' %}" target="_blank" rel="noopener">Termos de Uso</a>
+          e a
+          <a href="{% url 'core:pagina' slug='privacidade' %}" target="_blank" rel="noopener">Política de Privacidade</a>.
+        </label>
+        {% for erro in form.aceite_termos.errors %}<div class="invalid-feedback d-block">{{ erro }}</div>{% endfor %}
+      </div>
+
+      <button type="submit" class="btn-myller w-100 mt-2" style="padding:0.85rem">
+        Criar conta <i class="bi bi-arrow-right"></i>
+      </button>
+    </form>
+
+    <div class="auth-rodape">
+      Já é cliente? <a href="{% url 'usuarios:login' %}"><strong>Entrar</strong></a><br>
+      <a href="{% url 'core:home' %}" class="mt-2 d-inline-block" style="font-size:0.82rem">
+        <i class="bi bi-arrow-left"></i> Voltar à loja
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

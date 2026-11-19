@@ -1,0 +1,73 @@
+{% extends "dashboard/base_painel.html" %}
+
+{% block titulo %}Clientes{% endblock %}
+{% block topo_titulo %}Clientes{% endblock %}
+{% block topo_subtitulo %}Base de clientes e histórico de compras{% endblock %}
+
+{% block conteudo %}
+<section class="painel-cartao">
+  <div class="painel-cartao-topo">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <h3>Clientes</h3>
+      <span class="kpi-detalhe">{{ clientes|length }} encontrado(s)</span>
+    </div>
+    <form method="get" action="{% url 'dashboard:clientes' %}" class="barra-filtros">
+      <input type="search" name="q" value="{{ termo }}" class="form-control" placeholder="Nome, e-mail, CPF ou telefone" aria-label="Buscar cliente">
+      <button type="submit" class="btn-painel btn-pequeno">Buscar</button>
+      <a href="{% url 'dashboard:clientes' %}" class="btn-painel btn-secundario btn-pequeno">Limpar</a>
+    </form>
+  </div>
+
+  <div class="painel-cartao-corpo sem-padding">
+    <table class="tabela-painel">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>E-mail</th>
+          <th>Telefone</th>
+          <th>CPF</th>
+          <th>Status</th>
+          <th class="num">Pedidos</th>
+          <th class="num">Total gasto</th>
+          <th>Cliente desde</th>
+          <th class="num">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in clientes %}
+        <tr>
+          <td><strong>{{ c.nome_exibicao }}</strong></td>
+          <td>{{ c.usuario.email }}</td>
+          <td>{{ c.telefone|default:"—" }}</td>
+          <td>{{ c.cpf|default:"—" }}</td>
+          <td>
+            {% if c.usuario.is_active %}
+            <span class="badge-status bs-ativo">Ativo</span>
+            {% else %}
+            <span class="badge-status bs-inativo">Desativada</span>
+            {% endif %}
+          </td>
+          <td class="num">{{ c.qtd_pedidos|default:0 }}</td>
+          <td class="num">R$ {{ c.gasto|default:0|floatformat:2 }}</td>
+          <td>{{ c.criado_em|date:"d/m/Y" }}</td>
+          <td class="num">
+            <a href="{% url 'dashboard:cliente_detalhe' c.pk %}" class="btn-painel btn-secundario btn-pequeno">Ver</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9">
+            <div class="estado-vazio">
+              <i class="bi bi-people"></i>
+              <h4>Nenhum cliente encontrado</h4>
+              <p>{% if termo %}Nenhum cliente corresponde à busca "{{ termo }}".{% else %}Os clientes cadastrados na loja aparecerão aqui.{% endif %}</p>
+              <a href="{% url 'dashboard:clientes' %}" class="btn-painel">Limpar busca</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

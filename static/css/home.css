@@ -1,0 +1,413 @@
+/* ==========================================================================
+   MYLLER — Homepage
+   Hero editorial sob o header transparente, seções, depoimentos, Instagram.
+   Paleta: Azul #275B85 · Azul claro #95C2DF · Branco #FFF · Bege #C0B7A6
+   ========================================================================== */
+
+:root {
+  --altura-nav: 70px;
+}
+
+/* ---------------------------------------- Hero sob o cabeçalho transparente */
+.hero-inicio {
+  margin-top: calc(-1 * var(--altura-nav));
+  padding-top: var(--altura-nav);
+}
+
+.hero-inicio .hero-foto {
+  opacity: 0.6;
+  background-position: center 30%;
+  animation: heroCresce 1.6s ease both;
+}
+
+.hero-inicio::before {
+  background:
+    linear-gradient(100deg, rgba(12, 40, 62, 0.88) 8%, rgba(20, 52, 77, 0.55) 48%, rgba(39, 91, 133, 0.18) 100%),
+    radial-gradient(circle at 82% 20%, rgba(149, 194, 223, 0.28), transparent 45%);
+}
+
+.hero-inicio .hero-conteudo { max-width: 640px; padding: 6.5rem 0 5.5rem; }
+
+@keyframes heroCresce {
+  from { transform: scale(1.08); opacity: 0; }
+  to { transform: scale(1); opacity: 0.6; }
+}
+
+/* Entrada escalonada dos elementos do banner */
+.hero-anim {
+  opacity: 0;
+  transform: translateY(26px);
+  animation: heroSobe 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  animation-delay: calc(var(--i, 0) * 0.13s + 0.15s);
+}
+
+@keyframes heroSobe {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-inicio .hero-titulo { letter-spacing: 0.06em; }
+
+.hero-inicio .hero-titulo .linha {
+  display: block;
+  overflow: hidden;
+}
+
+.hero-inicio .btn-claro {
+  background: #fff;
+  border-color: #fff;
+  color: var(--azul-profundo);
+  font-weight: 600;
+  padding: 0.85rem 2.1rem;
+  letter-spacing: 0.1em;
+}
+
+.hero-inicio .btn-claro:hover {
+  background: var(--azul-claro);
+  border-color: var(--azul-claro);
+  color: var(--azul-profundo);
+  transform: translateY(-2px);
+}
+
+.hero-inicio .btn-ghost-claro {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  padding: 0.85rem 2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  backdrop-filter: blur(6px);
+  transition: all var(--transicao);
+}
+
+.hero-inicio .btn-ghost-claro:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: #fff;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.hero-rolagem {
+  position: absolute;
+  left: 50%;
+  bottom: 1.4rem;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  z-index: 3;
+}
+
+.hero-rolagem::after {
+  content: "";
+  width: 1px;
+  height: 34px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), transparent);
+  animation: setaCai 1.8s ease-in-out infinite;
+}
+
+@keyframes setaCai {
+  0%, 100% { transform: scaleY(0.4); transform-origin: top; opacity: 0.4; }
+  50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+}
+
+/* ------------------------------------------------------------- Carrosséis */
+.sec-carrossel .carrossel-trilho > .card-produto { min-width: 0; }
+
+/* -------------------------------------------- Coleção feminina (categorias) */
+.grid-colecao {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.4rem;
+}
+
+.tile-colecao {
+  position: relative;
+  border-radius: var(--raio);
+  overflow: hidden;
+  min-height: 320px;
+  display: flex;
+  align-items: flex-end;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: var(--sombra-suave);
+  transition: transform var(--transicao), box-shadow var(--transicao);
+}
+
+.tile-colecao:hover { transform: translateY(-6px); box-shadow: var(--sombra-alta); color: #fff; }
+
+.tile-colecao img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s ease;
+}
+
+.tile-colecao:hover img { transform: scale(1.07); }
+
+.tile-colecao::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(16, 41, 61, 0.85) 0%, rgba(16, 41, 61, 0.15) 55%, transparent 100%);
+}
+
+.tile-conteudo { position: relative; z-index: 2; padding: 1.5rem 1.4rem; width: 100%; }
+
+.tile-conteudo .tile-selo {
+  font-size: 0.68rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--azul-claro);
+}
+
+.tile-conteudo h4 {
+  font-family: var(--fonte-titulo);
+  font-size: 1.5rem;
+  margin: 0.35rem 0 0.2rem;
+  letter-spacing: 0.04em;
+}
+
+.tile-conteudo span { font-size: 0.8rem; color: #CFE1EE; }
+
+.tile-seta {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--azul);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: all var(--transicao);
+  z-index: 2;
+}
+
+.tile-colecao:hover .tile-seta { opacity: 1; transform: translateY(0); }
+
+/* -------------------------------------------------- Faixa de ofertas ------ */
+.faixa-ofertas {
+  background: linear-gradient(120deg, var(--azul-profundo), var(--azul) 70%, var(--azul-claro));
+  color: #fff;
+  border-radius: var(--raio-grande);
+  padding: 2.6rem 2.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2.4rem;
+}
+
+.faixa-ofertas::after {
+  content: "%";
+  position: absolute;
+  right: 1.5rem;
+  top: -3.5rem;
+  font-family: var(--fonte-titulo);
+  font-size: 14rem;
+  color: rgba(255, 255, 255, 0.07);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.faixa-ofertas .fo-conteudo { position: relative; z-index: 2; max-width: 560px; }
+
+.faixa-ofertas .fo-selo {
+  font-size: 0.7rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--azul-claro);
+}
+
+.faixa-ofertas h3 {
+  font-family: var(--fonte-titulo);
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  margin: 0.5rem 0 0.5rem;
+  letter-spacing: 0.03em;
+}
+
+.faixa-ofertas p { color: #D6E6F1; margin: 0; font-size: 0.95rem; }
+
+.faixa-ofertas .btn-myller {
+  position: relative;
+  z-index: 2;
+  background: #fff;
+  border-color: #fff;
+  color: var(--azul-profundo);
+}
+
+.faixa-ofertas .btn-myller:hover {
+  background: var(--azul-claro);
+  border-color: var(--azul-claro);
+}
+
+/* --------------------------------------------------- Depoimentos ---------- */
+.secao-depoimentos { background: var(--bege-claro); }
+
+.grid-depoimentos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.4rem;
+}
+
+.depoimento-card {
+  background: #fff;
+  border: 1px solid var(--bege-borda);
+  border-radius: var(--raio);
+  padding: 1.8rem 1.6rem 1.5rem;
+  position: relative;
+  transition: transform var(--transicao), box-shadow var(--transicao);
+}
+
+.depoimento-card:hover { transform: translateY(-5px); box-shadow: var(--sombra-card); }
+
+.depoimento-card::before {
+  content: "“";
+  position: absolute;
+  top: 0.4rem;
+  right: 1.2rem;
+  font-family: var(--fonte-titulo);
+  font-size: 4.5rem;
+  color: var(--azul-claro);
+  opacity: 0.55;
+  line-height: 1;
+}
+
+.depoimento-card .estrelas { color: var(--alerta); letter-spacing: 2px; font-size: 0.9rem; }
+
+.depoimento-card p {
+  color: var(--texto);
+  font-size: 0.93rem;
+  line-height: 1.65;
+  margin: 0.8rem 0 1.2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.depoimento-autor { display: flex; align-items: center; gap: 0.75rem; }
+
+.depoimento-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--azul), var(--azul-claro));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fonte-titulo);
+  font-size: 1rem;
+}
+
+.depoimento-autor strong { display: block; color: var(--tinta); font-size: 0.9rem; }
+.depoimento-autor span { font-size: 0.75rem; color: var(--texto-suave); }
+
+.etiqueta-ficticio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--azul-gelo);
+  color: var(--azul);
+  border: 1px dashed var(--azul-claro);
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  margin-bottom: 1.6rem;
+}
+
+/* ------------------------------------------------------- Instagram -------- */
+.grade-instagram {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.8rem;
+}
+
+.item-insta {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--raio-pequeno);
+  overflow: hidden;
+  display: block;
+  background: var(--bege-claro);
+}
+
+.item-insta img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.item-insta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(39, 91, 133, 0.42);
+  opacity: 0;
+  transition: opacity var(--transicao);
+}
+
+.item-insta .insta-icone {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.6rem;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: all var(--transicao);
+  z-index: 2;
+}
+
+.item-insta:hover img { transform: scale(1.08); }
+.item-insta:hover::after { opacity: 1; }
+.item-insta:hover .insta-icone { opacity: 1; transform: scale(1); }
+
+.insta-cabecalho-linguagem { display: flex; align-items: center; gap: 0.5rem; color: var(--texto-suave); font-size: 0.9rem; }
+.insta-cabecalho-linguagem a { color: var(--azul); font-weight: 600; }
+
+/* ------------------------------------------------------- Responsividade --- */
+@media (max-width: 991.98px) {
+  :root { --altura-nav: 62px; }
+  .hero-inicio .hero-conteudo { padding: 4.5rem 0 4rem; }
+  .hero-rolagem { display: none; }
+  .faixa-ofertas { padding: 2rem 1.6rem; }
+}
+
+@media (max-width: 767.98px) {
+  .hero-inicio { min-height: 520px; }
+  .hero-inicio .hero-conteudo { padding: 3.5rem 0 3rem; }
+  .hero-inicio .hero-titulo { font-size: clamp(2.1rem, 9vw, 2.8rem); }
+  .hero-estatisticas { gap: 1.5rem; margin-top: 2rem; }
+  .tile-colecao { min-height: 240px; }
+  .grade-instagram { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-anim { opacity: 1; transform: none; animation: none; }
+  .hero-inicio .hero-foto { animation: none; opacity: 0.6; }
+  .hero-rolagem::after { animation: none; }
+}

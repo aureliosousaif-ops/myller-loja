@@ -1,0 +1,35 @@
+# ============================================================
+# MYLLER — dependências do projeto (desenvolvimento e produção)
+# Python 3.13+ / Django 6.1
+# Instale com:  pip install -r requirements.txt
+# (o Railway instala apenas este arquivo)
+# ============================================================
+
+# Framework web
+Django==6.1.2
+
+# Variáveis de ambiente (.env) — carregado em myller/__init__.py
+python-dotenv==1.2.4
+
+# Chamadas HTTP externas (ViaCEP, gateways de pagamento, fretes)
+requests==2.34.2
+
+# Imagens — ImageField do Django exige Pillow (upload de produtos/categorias,
+# geração das imagens demonstrativas via `manage.py gerar_imagens_demo`)
+Pillow==13.0.0
+
+# ------------------------------------------------------------
+# Produção (Railway / gunicorn) — mantidos aqui porque o build
+# da Railway instala somente este arquivo
+# ------------------------------------------------------------
+
+# Servidor WSGI
+gunicorn>=23.0
+
+# Servir estáticos comprimidos/cached (ativado automaticamente
+# em settings.py quando o pacote está instalado)
+# Obs.: a última versão publicada é a 6.x — não exigir >=8 (build falharia).
+whitenoise>=6.12
+
+# PostgreSQL (usado quando POSTGRES_DB está definido)
+psycopg[binary]>=3.2

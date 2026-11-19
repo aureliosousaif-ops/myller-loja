@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Meus endereços — {{ loja.nome_loja }}{% endblock %}
+
+{% block conteudo %}
+<div class="pagina-catalogo">
+  <div class="container">
+    <nav class="caminho">
+      <a href="{% url 'core:home' %}">Início</a>
+      <i class="bi bi-chevron-right mx-1"></i>
+      <a href="{% url 'clientes:perfil' %}">Minha conta</a>
+      <i class="bi bi-chevron-right mx-1"></i> Endereços
+    </nav>
+
+    <div class="conta-layout mt-3">
+      {% include "includes/conta_menu.html" %}
+
+      <div class="conteudo-conta">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4"
+             style="border-bottom:1px solid var(--bege-borda);padding-bottom:0.9rem">
+          <h2 class="mb-0" style="border:none;padding:0">Meus endereços</h2>
+          <a href="{% url 'clientes:endereco_novo' %}" class="btn-myller btn-pequeno">
+            <i class="bi bi-plus-lg"></i> Novo endereço
+          </a>
+        </div>
+
+        <div class="row g-3">
+          {% for endereco in enderecos %}
+            <div class="col-md-6">
+              <div class="cartao-endereco {% if endereco.padrao %}padrao{% endif %}">
+                {% if endereco.padrao %}<span class="tag-padrao">Padrão</span>{% endif %}
+                <h6>{{ endereco.apelido }}</h6>
+                <div class="endereco-linha">
+                  {{ endereco.logradouro }}, {{ endereco.numero }}
+                  {% if endereco.complemento %} — {{ endereco.complemento }}{% endif %}<br>
+                  {{ endereco.bairro }} · {{ endereco.cidade }}/{{ endereco.estado }}<br>
+                  CEP {{ endereco.cep }}
+                </div>
+
+                <div class="d-flex gap-2 mt-3 flex-wrap">
+                  <a href="{% url 'clientes:endereco_editar' endereco.pk %}" class="btn-outline-myller btn btn-pequeno">
+                    <i class="bi bi-pencil"></i> Editar
+                  </a>
+                  {% if not endereco.padrao %}
+                    <form method="post" action="{% url 'clientes:endereco_padrao' endereco.pk %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn-outline-myller btn btn-pequeno">Tornar padrão</button>
+                    </form>
+                  {% endif %}
+                  <form method="post" action="{% url 'clientes:endereco_excluir' endereco.pk %}"
+                        onsubmit="return confirm('Remover este endereço?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-outline-myller btn btn-pequeno" style="border-color:var(--erro);color:var(--erro)">
+                      <i class="bi bi-trash3"></i> Excluir
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <div class="col-12">
+              <div class="estado-vazio">
+                <i class="bi bi-geo-alt"></i>
+                <h4>Nenhum endereço cadastrado</h4>
+                <p>Cadastre seu primeiro endereço para agilizar o checkout.</p>
+                <a href="{% url 'clientes:endereco_novo' %}" class="btn-myller">Cadastrar endereço</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

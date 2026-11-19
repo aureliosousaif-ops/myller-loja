@@ -1,0 +1,268 @@
+{% extends "dashboard/base_painel.html" %}
+
+{% block titulo %}{% if modo_edicao %}Editar produto{% else %}Novo produto{% endif %}{% endblock %}
+{% block topo_titulo %}{% if modo_edicao %}Editar produto{% else %}Novo produto{% endif %}{% endblock %}
+{% block topo_subtitulo %}{% if modo_edicao %}{{ produto.nome }} — dados, variações e imagens{% else %}Cadastre um produto com variações e imagens{% endif %}{% endblock %}
+
+{% block conteudo %}
+<form method="post" enctype="multipart/form-data" class="painel-form">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+  <div class="painel-alerta painel-alerta-error mb-3">
+    <i class="bi bi-x-circle-fill"></i>
+    <span>{% for erro in form.non_field_errors %}{{ erro }}{% endfor %}</span>
+  </div>
+  {% endif %}
+
+  <!-- =============================== Dados do produto =============================== -->
+  <section class="painel-cartao">
+    <div class="painel-cartao-topo">
+      <h3>Dados do produto</h3>
+    </div>
+    <div class="painel-cartao-corpo">
+
+      <div class="grade-duas">
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.nome.id_for_label }}">{{ form.nome.label }}</label>
+          {{ form.nome }}
+          {% if form.nome.errors %}<div class="invalid-feedback d-block">{% for erro in form.nome.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }}</label>
+          {{ form.categoria }}
+          {% if form.categoria.errors %}<div class="invalid-feedback d-block">{% for erro in form.categoria.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.resumo.id_for_label }}">{{ form.resumo.label }}</label>
+        {{ form.resumo }}
+        {% if form.resumo.errors %}<div class="invalid-feedback d-block">{% for erro in form.resumo.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+        {% if form.resumo.help_text %}<div class="helptext">{{ form.resumo.help_text }}</div>{% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.descricao.id_for_label }}">{{ form.descricao.label }}</label>
+        {{ form.descricao }}
+        {% if form.descricao.errors %}<div class="invalid-feedback d-block">{% for erro in form.descricao.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+      </div>
+
+      <div class="grade-duas">
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.preco.id_for_label }}">{{ form.preco.label }}</label>
+          {{ form.preco }}
+          {% if form.preco.errors %}<div class="invalid-feedback d-block">{% for erro in form.preco.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.preco_promocional.id_for_label }}">{{ form.preco_promocional.label }}</label>
+          {{ form.preco_promocional }}
+          {% if form.preco_promocional.errors %}<div class="invalid-feedback d-block">{% for erro in form.preco_promocional.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="grade-duas">
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.sku.id_for_label }}">{{ form.sku.label }}</label>
+          {{ form.sku }}
+          {% if form.sku.errors %}<div class="invalid-feedback d-block">{% for erro in form.sku.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+          {% if form.sku.help_text %}<div class="helptext">{{ form.sku.help_text }}</div>{% endif %}
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.peso_kg.id_for_label }}">{{ form.peso_kg.label }}</label>
+          {{ form.peso_kg }}
+          {% if form.peso_kg.errors %}<div class="invalid-feedback d-block">{% for erro in form.peso_kg.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="grade-duas">
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>
+          {{ form.status }}
+          {% if form.status.errors %}<div class="invalid-feedback d-block">{% for erro in form.status.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+        </div>
+        <div>
+          <div class="form-check mb-3">
+            {{ form.destaque_home }}
+            <label class="form-check-label" for="{{ form.destaque_home.id_for_label }}">{{ form.destaque_home.label }}</label>
+          </div>
+          <div class="form-check mb-3">
+            {{ form.eh_novidade }}
+            <label class="form-check-label" for="{{ form.eh_novidade.id_for_label }}">{{ form.eh_novidade.label }}</label>
+          </div>
+          <div class="form-check">
+            {{ form.demonstracao }}
+            <label class="form-check-label" for="{{ form.demonstracao.id_for_label }}">{{ form.demonstracao.label }}</label>
+            {% if form.demonstracao.help_text %}
+              <div class="helptext">{{ form.demonstracao.help_text }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =============================== Variações =============================== -->
+  <section class="painel-cartao">
+    <div class="painel-cartao-topo">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <h3>Variações (tamanho e cor)</h3>
+        <span class="kpi-detalhe">{{ formset.forms|length }} variação(ões)</span>
+      </div>
+    </div>
+    <div class="painel-cartao-corpo">
+      {{ formset.management_form }}
+
+      {% if formset.non_form_errors %}
+      <div class="painel-alerta painel-alerta-error mb-3">
+        <i class="bi bi-x-circle-fill"></i>
+        <span>{% for erro in formset.non_form_errors %}{{ erro }}{% endfor %}</span>
+      </div>
+      {% endif %}
+
+      {% if not modo_edicao %}
+      <p class="formset-vazio">Nenhuma variação cadastrada ainda. Preencha a linha abaixo para criar a primeira (tamanho, cor e estoque).</p>
+      {% endif %}
+
+      {% for vf in formset %}
+      <div class="formset-linha{% if vf.errors %} has-erro{% endif %}">
+        {% for oculto in vf.hidden_fields %}{{ oculto }}{% endfor %}
+        <button type="button" class="formset-remover" data-remover-linha>Remover</button>
+
+        <div class="row g-2 align-items-end">
+          <div class="col-6 col-md-2">
+            <label class="form-label" for="{{ vf.tamanho.id_for_label }}">Tamanho</label>
+            {{ vf.tamanho }}
+            {% if vf.tamanho.errors %}<div class="invalid-feedback d-block">{% for erro in vf.tamanho.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+          </div>
+          <div class="col-6 col-md-2">
+            <label class="form-label" for="{{ vf.cor.id_for_label }}">Cor</label>
+            {{ vf.cor }}
+            {% if vf.cor.errors %}<div class="invalid-feedback d-block">{% for erro in vf.cor.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+          </div>
+          <div class="col-6 col-md-2">
+            <label class="form-label" for="{{ vf.sku.id_for_label }}">SKU</label>
+            {{ vf.sku }}
+            {% if vf.sku.errors %}<div class="invalid-feedback d-block">{% for erro in vf.sku.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+          </div>
+          <div class="col-6 col-md-2">
+            <label class="form-label" for="{{ vf.preco_adicional.id_for_label }}">Preço adicional</label>
+            {{ vf.preco_adicional }}
+            {% if vf.preco_adicional.errors %}<div class="invalid-feedback d-block">{% for erro in vf.preco_adicional.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+          </div>
+          <div class="col-6 col-md-2">
+            <label class="form-label" for="{{ vf.estoque.id_for_label }}">Estoque</label>
+            {{ vf.estoque }}
+            {% if vf.estoque.errors %}<div class="invalid-feedback d-block">{% for erro in vf.estoque.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+          </div>
+          <div class="col-6 {% if modo_edicao %}col-md-1{% else %}col-md-2{% endif %}">
+            <div class="form-check mb-2">
+              {{ vf.ativa }}
+              <label class="form-check-label" for="{{ vf.ativa.id_for_label }}">Ativa</label>
+            </div>
+            {% if vf.ativa.errors %}<div class="invalid-feedback d-block">{% for erro in vf.ativa.errors %}{{ erro }}{% endfor %}</div>{% endif %}
+          </div>
+          {% if modo_edicao %}
+          <div class="col-6 col-md-1">
+            <div class="form-check mb-2">
+              {{ vf.DELETE }}
+              <label class="form-check-label" for="{{ vf.DELETE.id_for_label }}">Remover</label>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if vf.non_field_errors %}
+        <div class="invalid-feedback d-block mt-2">
+          {% for erro in vf.non_field_errors %}{{ erro }}{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      <button type="button" class="btn-painel btn-secundario mt-3" id="adicionarLinha">
+        <i class="bi bi-plus-lg"></i> Adicionar variação
+      </button>
+
+      {# Linha-modelo clonada pelo painel.js (prefixo usa __prefix__) #}
+      {% with vf=formset.empty_form %}
+      <template id="formsetTemplate">
+        <div class="formset-linha">
+          {% for oculto in vf.hidden_fields %}{{ oculto }}{% endfor %}
+          <button type="button" class="formset-remover" data-remover-linha>Remover</button>
+
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-2">
+              <label class="form-label" for="{{ vf.tamanho.id_for_label }}">Tamanho</label>
+              {{ vf.tamanho }}
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label" for="{{ vf.cor.id_for_label }}">Cor</label>
+              {{ vf.cor }}
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label" for="{{ vf.sku.id_for_label }}">SKU</label>
+              {{ vf.sku }}
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label" for="{{ vf.preco_adicional.id_for_label }}">Preço adicional</label>
+              {{ vf.preco_adicional }}
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label" for="{{ vf.estoque.id_for_label }}">Estoque</label>
+              {{ vf.estoque }}
+            </div>
+            <div class="col-6 col-md-2">
+              <div class="form-check mb-2">
+                {{ vf.ativa }}
+                <label class="form-check-label" for="{{ vf.ativa.id_for_label }}">Ativa</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+      {% endwith %}
+    </div>
+  </section>
+
+  <!-- =============================== Imagens =============================== -->
+  <section class="painel-cartao">
+    <div class="painel-cartao-topo">
+      <h3>Imagens da galeria</h3>
+    </div>
+    <div class="painel-cartao-corpo">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="id_imagens">Adicionar imagens</label>
+          <input type="file" name="imagens" id="id_imagens" multiple accept="image/*" class="form-control">
+          <div class="helptext">Formatos aceitos: JPG, PNG, WEBP ou GIF — máximo de 8 MB por arquivo. Selecione vários de uma vez.</div>
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="id_alt_imagem">Texto alternativo (opcional)</label>
+          <input type="text" name="alt_imagem" id="id_alt_imagem" class="form-control" maxlength="200" placeholder="Descrição das imagens para acessibilidade">
+          <div class="helptext">Aplicado às imagens enviadas nesta operação.</div>
+        </div>
+      </div>
+
+      {% if produto %}
+      <div class="kpi-rotulo mt-4 mb-2">Galeria atual</div>
+      <div class="d-flex flex-wrap gap-2">
+        {% for img in produto.imagens.all %}
+        <img src="{{ img.imagem.url }}" alt="{{ img.texto_alt }}" title="{{ img.texto_alt }}"
+             style="width: 64px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #E7E2DA;">
+        {% empty %}
+        <p class="formset-vazio">Nenhuma imagem na galeria ainda — envie a primeira acima.</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- =============================== Ações =============================== -->
+  <div class="barra-formulario">
+    <a href="{% url 'dashboard:produtos' %}" class="btn-painel btn-secundario">Voltar</a>
+    <button type="submit" class="btn-painel"><i class="bi bi-check-lg"></i> {{ acao|default:"Salvar produto" }}</button>
+  </div>
+</form>
+{% endblock %}

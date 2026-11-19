@@ -1,0 +1,333 @@
+{% extends "dashboard/base_painel.html" %}
+{% load humanize %}
+
+{% block titulo %}Dashboard{% endblock %}
+{% block topo_titulo %}Dashboard{% endblock %}
+{% block topo_subtitulo %}Visão geral da loja: vendas, pedidos e estoque{% endblock %}
+
+{% load static %}
+{% block conteudo %}
+
+<!-- ============================ Faixa de marca ============================ -->
+<div class="faixa-marca">
+  <div class="fm-esquerda">
+    {% if loja.logo %}
+      <img src="{{ loja.logo.url }}" alt="{{ loja.nome_loja }}">
+    {% else %}
+      <img src="{% static 'img/logo-myller-clara.png' %}" alt="{{ loja.nome_loja }}">
+    {% endif %}
+    <div>
+      <h2>Bem-vinda ao painel {{ loja.nome_loja }}</h2>
+      <p>
+        {{ kpi.produtos_publicados }} produtos publicados ·
+        {{ kpi.categorias_ativas }} categorias ativas ·
+        {{ kpi.produtos_demo }} itens de demonstração
+      </p>
+    </div>
+  </div>
+  <div class="fm-acoes">
+    <a href="{% url 'dashboard:produto_novo' %}" class="btn-claro-painel">
+      <i class="bi bi-plus-lg me-1"></i> Novo produto
+    </a>
+    <a href="{% url 'produtos:lista' %}" class="btn-ghost-painel" target="_blank" rel="noopener">
+      <i class="bi bi-box-arrow-up-right me-1"></i> Ver loja
+    </a>
+  </div>
+</div>
+
+<!-- =============================== KPIs =============================== -->
+<div class="grade-kpi">
+  <div class="cartao-kpi">
+    <div class="kpi-icone verde"><i class="bi bi-currency-dollar"></i></div>
+    <div>
+      <div class="kpi-rotulo">Faturamento</div>
+      <div class="kpi-valor">R$ {{ kpi.faturamento|floatformat:2 }}</div>
+      <div class="kpi-detalhe">soma dos pedidos não cancelados</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone verde"><i class="bi bi-calendar-day"></i></div>
+    <div>
+      <div class="kpi-rotulo">Faturamento do dia</div>
+      <div class="kpi-valor">R$ {{ kpi.faturamento_dia|floatformat:2 }}</div>
+      <div class="kpi-detalhe">pedidos de hoje, não cancelados</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone verde"><i class="bi bi-calendar-month"></i></div>
+    <div>
+      <div class="kpi-rotulo">Faturamento do mês</div>
+      <div class="kpi-valor">R$ {{ kpi.faturamento_mes|floatformat:2 }}</div>
+      <div class="kpi-detalhe">mês corrente, não cancelados</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone verde"><i class="bi bi-bag-check"></i></div>
+    <div>
+      <div class="kpi-rotulo">Vendas realizadas</div>
+      <div class="kpi-valor">{{ kpi.total_vendas }}</div>
+      <div class="kpi-detalhe">pedidos não cancelados</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone bege"><i class="bi bi-receipt"></i></div>
+    <div>
+      <div class="kpi-rotulo">Ticket médio</div>
+      <div class="kpi-valor">R$ {{ kpi.ticket_medio|floatformat:2 }}</div>
+      <div class="kpi-detalhe">valor médio por venda</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone"><i class="bi bi-boxes"></i></div>
+    <div>
+      <div class="kpi-rotulo">Total de pedidos</div>
+      <div class="kpi-valor">{{ kpi.total_pedidos }}</div>
+      <div class="kpi-detalhe">todos os pedidos registrados</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone ambar"><i class="bi bi-hourglass-split"></i></div>
+    <div>
+      <div class="kpi-rotulo">Aguardando pagamento</div>
+      <div class="kpi-valor">{{ kpi.pendentes }}</div>
+      <div class="kpi-detalhe">pedidos pendentes de confirmação</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone"><i class="bi bi-arrow-left-right"></i></div>
+    <div>
+      <div class="kpi-rotulo">Em andamento</div>
+      <div class="kpi-valor">{{ kpi.em_andamento }}</div>
+      <div class="kpi-detalhe">em preparação e enviados</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone verde"><i class="bi bi-check2-circle"></i></div>
+    <div>
+      <div class="kpi-rotulo">Concluídos</div>
+      <div class="kpi-valor">{{ kpi.concluidos }}</div>
+      <div class="kpi-detalhe">pedidos entregues</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone"><i class="bi bi-people"></i></div>
+    <div>
+      <div class="kpi-rotulo">Clientes</div>
+      <div class="kpi-valor">{{ kpi.total_clientes }}</div>
+      <div class="kpi-detalhe">contas cadastradas na loja</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone bege"><i class="bi bi-box-seam"></i></div>
+    <div>
+      <div class="kpi-rotulo">Produtos</div>
+      <div class="kpi-valor">{{ kpi.total_produtos }}</div>
+      <div class="kpi-detalhe">itens no catálogo</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone vermelho"><i class="bi bi-exclamation-triangle"></i></div>
+    <div>
+      <div class="kpi-rotulo">Estoque baixo</div>
+      <div class="kpi-valor">{{ kpi.estoque_baixo }}</div>
+      <div class="kpi-detalhe">produtos publicados para reposição</div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================== Gráficos =============================== -->
+<div class="grade-duas">
+  <section class="painel-cartao">
+    <div class="painel-cartao-topo">
+      <h3>Pedidos — últimos 30 dias</h3>
+    </div>
+    <div class="painel-cartao-corpo">
+      <div class="grafico-barras">
+        {% for item in serie_diaria %}
+        <div class="barra">
+          <span class="coluna" style="height: {{ item.pct }}%" data-valor="{{ item.qtd }} pedidos"></span>
+          <span class="rotulo">{{ item.label }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="painel-cartao">
+    <div class="painel-cartao-topo">
+      <h3>Faturamento — últimos 12 meses</h3>
+    </div>
+    <div class="painel-cartao-corpo">
+      <div class="grafico-mensal">
+        {% for item in serie_mensal %}
+        <div class="coluna-mes">
+          <span class="preenchimento" style="height: {{ item.pct }}%" data-valor="R$ {{ item.total|floatformat:2 }}"></span>
+          <span class="rotulo">{{ item.label }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ====================== Distribuição por status ====================== -->
+<section class="painel-cartao mb-3">
+  <div class="painel-cartao-topo">
+    <h3>Distribuição dos pedidos por status</h3>
+    <a href="{% url 'dashboard:relatorios' %}" class="btn-painel btn-secundario btn-pequeno">Ver relatórios</a>
+  </div>
+  <div class="painel-cartao-corpo">
+    <div class="grade-status">
+      {% for item in serie_status %}
+      <div class="item-status">
+        <div class="item-status-topo">
+          <span class="badge-status bs-{{ item.valor }}">{{ item.rotulo }}</span>
+          <span class="kpi-detalhe"><strong>{{ item.qtd }}</strong> · {{ item.pct }}%</span>
+        </div>
+        <div class="barra-progresso-lista {% if item.qtd == 0 %}zero{% endif %}">
+          <span style="width: {{ item.pct }}%"></span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- =============================== Mais vendidos / Pedidos / Estoque =============================== -->
+<div class="grade-tres">
+  <div>
+    <section class="painel-cartao">
+      <div class="painel-cartao-topo">
+        <h3>Mais vendidos</h3>
+      </div>
+      <div class="painel-cartao-corpo sem-padding">
+        <table class="tabela-painel">
+          <thead>
+            <tr>
+              <th style="width: 48px">#</th>
+              <th>Produto</th>
+              <th class="num">Vendidos</th>
+              <th class="num">Preço</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in top_produtos %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>
+                <div class="mini-produto">
+                  <div class="mini-img">
+                    {% if p.imagem_principal %}<img src="{{ p.imagem_principal.url }}" alt="{{ p.nome }}">{% else %}<i class="bi bi-image"></i>{% endif %}
+                  </div>
+                  <div>
+                    <a class="mini-nome" href="{% url 'dashboard:produto_editar' p.pk %}">{{ p.nome }}</a>
+                    <div class="mini-sku">{{ p.sku }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="num"><strong>{{ p.vendidos }}</strong></td>
+              <td class="num">R$ {{ p.preco_final|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4">
+                <div class="estado-vazio">
+                  <i class="bi bi-bar-chart"></i>
+                  <h4>Sem vendas registradas</h4>
+                  <p>Os produtos mais vendidos aparecerão aqui conforme os pedidos forem concluídos.</p>
+                  <a href="{% url 'dashboard:produtos' %}" class="btn-painel">Ver produtos</a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="painel-cartao">
+      <div class="painel-cartao-topo">
+        <h3>Últimos pedidos</h3>
+        <a href="{% url 'dashboard:pedidos' %}" class="btn-painel btn-secundario btn-pequeno">Ver todos</a>
+      </div>
+      <div class="painel-cartao-corpo sem-padding">
+        <table class="tabela-painel">
+          <thead>
+            <tr>
+              <th>Pedido</th>
+              <th>Data</th>
+              <th>Cliente</th>
+              <th class="num">Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in ultimos_pedidos %}
+            <tr>
+              <td><a href="{% url 'dashboard:pedido_detalhe' p.numero %}"><strong>{{ p.numero }}</strong></a></td>
+              <td>{{ p.criado_em|date:"d/m/Y H:i" }}</td>
+              <td>
+                {{ p.nome }}
+                <div class="mini-sku">{{ p.email }}</div>
+              </td>
+              <td class="num">R$ {{ p.total|floatformat:2 }}</td>
+              <td><span class="badge-status bs-{{ p.status }}">{{ p.get_status_display }}</span></td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5">
+                <div class="estado-vazio">
+                  <i class="bi bi-receipt"></i>
+                  <h4>Nenhum pedido ainda</h4>
+                  <p>Os pedidos registrados na loja aparecerão aqui.</p>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <section class="painel-cartao">
+    <div class="painel-cartao-topo">
+      <h3>Estoque baixo</h3>
+    </div>
+    <div class="painel-cartao-corpo">
+      {% for p in produtos_baixo_estoque %}
+      <div class="mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <a href="{% url 'dashboard:produto_editar' p.pk %}"><strong>{{ p.nome }}</strong></a>
+          <span class="kpi-detalhe">{{ p.total|default:0 }} un.</span>
+        </div>
+        <div class="barra-progresso-lista {% if p.total == 0 %}zero{% else %}baixo{% endif %}">
+          <span style="width: {% widthratio p.total|default:0 5 100 %}%"></span>
+        </div>
+      </div>
+      {% empty %}
+      <div class="estado-vazio">
+        <i class="bi bi-check-circle"></i>
+        <h4>Estoque saudável</h4>
+        <p>Nenhum produto publicado com estoque baixo no momento.</p>
+      </div>
+      {% endfor %}
+      <a href="{% url 'dashboard:estoque' %}" class="btn-painel btn-secundario btn-pequeno w-100 justify-content-center">
+        <i class="bi bi-clipboard-check"></i> Abrir estoque
+      </a>
+    </div>
+  </section>
+</div>
+
+{% endblock %}

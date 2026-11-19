@@ -1,0 +1,40 @@
+{% load static %}
+{# Menu lateral da área do cliente — usa request.resolver_match.url_name #}
+{% with url_atual=request.resolver_match.url_name %}
+<aside class="conta-menu">
+  <div class="cabecalho">
+    <div class="avatar"><i class="bi bi-person"></i></div>
+    <div class="nome">{{ user.get_full_name|default:user.username }}</div>
+    <div class="email">{{ user.email }}</div>
+  </div>
+
+  <a href="{% url 'clientes:perfil' %}" class="conta-item {% if url_atual == 'perfil' %}ativo{% endif %}">
+    <i class="bi bi-person-circle"></i> Meus dados
+  </a>
+  <a href="{% url 'clientes:editar_perfil' %}" class="conta-item {% if url_atual == 'editar_perfil' %}ativo{% endif %}">
+    <i class="bi bi-pencil-square"></i> Editar perfil
+  </a>
+  <a href="{% url 'clientes:enderecos' %}" class="conta-item {% if url_atual in 'enderecos endereco_novo endereco_editar endereco_excluir endereco_padrao' %}ativo{% endif %}">
+    <i class="bi bi-geo-alt"></i> Meus endereços
+  </a>
+  <a href="{% url 'clientes:meus_pedidos' %}" class="conta-item {% if url_atual == 'meus_pedidos' %}ativo{% endif %}">
+    <i class="bi bi-box-seam"></i> Meus pedidos
+  </a>
+  <a href="{% url 'favoritos:lista' %}" class="conta-item {% if url_atual == 'lista' %}ativo{% endif %}">
+    <i class="bi bi-heart"></i> Favoritos
+  </a>
+  <a href="{% url 'clientes:alterar_senha' %}" class="conta-item {% if url_atual == 'alterar_senha' %}ativo{% endif %}">
+    <i class="bi bi-key"></i> Alterar senha
+  </a>
+
+  {% if user.is_staff %}
+    <a href="{% url 'dashboard:home' %}" class="conta-item">
+      <i class="bi bi-speedometer2"></i> Painel administrativo
+    </a>
+  {% endif %}
+
+  <a href="{% url 'usuarios:logout' %}" class="conta-item sair">
+    <i class="bi bi-box-arrow-right"></i> Sair da conta
+  </a>
+</aside>
+{% endwith %}

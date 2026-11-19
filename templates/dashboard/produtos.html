@@ -1,0 +1,133 @@
+{% extends "dashboard/base_painel.html" %}
+
+{% block titulo %}Produtos{% endblock %}
+{% block topo_titulo %}Produtos{% endblock %}
+{% block topo_subtitulo %}Catálogo da loja: cadastro, publicação e estoque{% endblock %}
+
+{% block conteudo %}
+<section class="painel-cartao">
+  <div class="painel-cartao-topo">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <h3>Produtos</h3>
+      <span class="kpi-detalhe">{{ produtos|length }} encontrado(s)</span>
+    </div>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <a href="{% url 'dashboard:produto_novo' %}" class="btn-painel btn-pequeno">
+        <i class="bi bi-plus-lg"></i> Novo produto
+      </a>
+      <form method="get" action="{% url 'dashboard:produtos' %}" class="barra-filtros">
+        <input type="search" name="q" value="{{ termo }}" class="form-control" placeholder="Buscar por nome, SKU ou descrição" aria-label="Buscar produto">
+        <select name="status" class="form-select" aria-label="Filtrar por status">
+          <option value="">Todos os status</option>
+          {% for valor, rotulo in status_choices %}
+          <option value="{{ valor }}" {% if status_filtro == valor %}selected{% endif %}>{{ rotulo }}</option>
+          {% endfor %}
+        </select>
+        <select name="categoria" class="form-select" aria-label="Filtrar por categoria">
+          <option value="">Todas as categorias</option>
+          {% for c in categorias %}
+          <option value="{{ c.pk }}" {% if categoria_filtro == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.nome }}</option>
+          {% endfor %}
+        </select>
+        <select name="marcacao" class="form-select" aria-label="Filtrar por marcação">
+          <option value="">Marcações</option>
+          <option value="destaque" {% if marcacao == "destaque" %}selected{% endif %}>Destaques</option>
+          <option value="novidade" {% if marcacao == "novidade" %}selected{% endif %}>Novidades</option>
+          <option value="promocao" {% if marcacao == "promocao" %}selected{% endif %}>Em promoção</option>
+        </select>
+        <select name="estoque" class="form-select" aria-label="Filtrar por estoque">
+          <option value="">Qualquer estoque</option>
+          <option value="disponivel" {% if estoque_filtro == "disponivel" %}selected{% endif %}>Com estoque</option>
+          <option value="baixo" {% if estoque_filtro == "baixo" %}selected{% endif %}>Estoque baixo (≤5)</option>
+          <option value="esgotado" {% if estoque_filtro == "esgotado" %}selected{% endif %}>Esgotado</option>
+        </select>
+        <select name="ordenacao" class="form-select" aria-label="Ordenar">
+          <option value="-criado_em" {% if ordenacao == "-criado_em" %}selected{% endif %}>Mais recentes</option>
+          <option value="nome" {% if ordenacao == "nome" %}selected{% endif %}>Nome A-Z</option>
+          <option value="-preco" {% if ordenacao == "-preco" %}selected{% endif %}>Maior preço</option>
+          <option value="preco" {% if ordenacao == "preco" %}selected{% endif %}>Menor preço</option>
+          <option value="-total_estoque" {% if ordenacao == "-total_estoque" %}selected{% endif %}>Maior estoque</option>
+        </select>
+        <button type="submit" class="btn-painel btn-pequeno">Filtrar</button>
+        <a href="{% url 'dashboard:produtos' %}" class="btn-painel btn-secundario btn-pequeno">Limpar</a>
+      </form>
+    </div>
+  </div>
+
+  <div class="painel-cartao-corpo sem-padding">
+    <table class="tabela-painel">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Categoria</th>
+          <th class="num">Preço</th>
+          <th>Estoque</th>
+          <th>Status</th>
+          <th>Criado em</th>
+          <th class="num">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in produtos %}
+        <tr>
+          <td>
+            <div class="mini-produto">
+              <div class="mini-img">
+                {% if p.imagem_principal %}<img src="{{ p.imagem_principal.url }}" alt="{{ p.nome }}">{% else %}<i class="bi bi-image"></i>{% endif %}
+              </div>
+              <div>
+                <div class="mini-nome">
+                  {{ p.nome }}
+                  {% if p.demonstracao %}
+                    <span class="badge-demo" title="Produto criado pelo seed de demonstração (conteúdo fictício)">demo</span>
+                  {% endif %}
+                </div>
+                <div class="mini-sku">{{ p.sku }}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{ p.categoria.nome }}</td>
+          <td class="num">R$ {{ p.preco_final|floatformat:2 }}</td>
+          <td>
+            {% with estoque=p.total_estoque|default:0 %}
+            <div class="barra-progresso-lista {% if estoque == 0 %}zero{% elif estoque <= 5 %}baixo{% endif %} mb-1">
+              <span style="width: {% if estoque >= 50 %}100{% else %}{% widthratio estoque 50 100 %}{% endif %}%"></span>
+            </div>
+            <span class="mini-sku">{{ estoque }} un.</span>
+            {% endwith %}
+          </td>
+          <td><span class="badge-status bs-{{ p.status }}">{{ p.get_status_display }}</span></td>
+          <td>{{ p.criado_em|date:"d/m/Y" }}</td>
+          <td class="num">
+            <div class="d-flex gap-2 justify-content-end flex-wrap">
+              <a href="{% url 'dashboard:produto_editar' p.pk %}" class="btn-painel btn-secundario btn-pequeno">Editar</a>
+              <form method="post" action="{% url 'dashboard:produto_toggle' p.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn-painel btn-pequeno">
+                  {% if p.status == 'publicado' %}Despublicar{% else %}Publicar{% endif %}
+                </button>
+              </form>
+              <form method="post" action="{% url 'dashboard:produto_excluir' p.pk %}" class="d-inline" data-confirm="Excluir o produto {{ p.nome }}?">
+                {% csrf_token %}
+                <button type="submit" class="btn-painel btn-perigo btn-pequeno">Excluir</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7">
+            <div class="estado-vazio">
+              <i class="bi bi-box-seam"></i>
+              <h4>Nenhum produto encontrado</h4>
+              <p>Ajuste os filtros de busca ou cadastre um novo produto no catálogo.</p>
+              <a href="{% url 'dashboard:produto_novo' %}" class="btn-painel"><i class="bi bi-plus-lg"></i> Novo produto</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block titulo %}Erro interno — {{ loja.nome_loja }}{% endblock %}
+
+{% block conteudo %}
+<div class="erro-404">
+  <div class="container">
+    <div class="codigo">500</div>
+    <h1 class="secao-titulo mb-2">Algo deu errado</h1>
+    <p class="text-muted" style="max-width:440px;margin:0 auto 1.6rem">
+      Nosso time já foi avisado. Tente novamente em instantes.
+    </p>
+    <a href="{% url 'core:home' %}" class="btn-myller">Voltar ao início</a>
+  </div>
+</div>
+{% endblock %}

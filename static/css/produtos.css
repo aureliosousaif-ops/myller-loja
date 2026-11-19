@@ -1,0 +1,200 @@
+/* ==========================================================================
+   MYLLER — Catálogo e página do produto
+   Refinamentos do catálogo (filtros, loading, mobile), galeria premium e
+   produtos relacionados.
+   ========================================================================== */
+
+/* ---------------------------------------------------- Cabeçalho do catálogo */
+.pagina-catalogo .cabecalho-pagina {
+  background: linear-gradient(120deg, var(--azul-gelo), rgba(244, 241, 236, 0.65));
+  border: 1px solid var(--bege-borda);
+  border-radius: var(--raio);
+  padding: 2rem 2.2rem;
+  margin-bottom: 2.2rem;
+}
+
+.pagina-catalogo .cabecalho-pagina .secao-titulo { margin-top: 0.2rem; }
+
+/* ------------------------------------------------------------- Filtros ---- */
+.filtros {
+  background: #fff;
+  border: 1px solid var(--bege-borda);
+  border-radius: var(--raio);
+  padding: 1.3rem 1.4rem;
+}
+
+.filtros .filtro-grupo:first-child { padding-top: 0.2rem; }
+
+.filtro-titulo { display: flex; align-items: center; gap: 0.5rem; }
+.filtro-titulo::before {
+  content: "";
+  width: 14px;
+  height: 2px;
+  background: var(--bege);
+  border-radius: 2px;
+}
+
+.btn-filtros-mobile { display: none; }
+
+/* ------------------------------------------- Estado de carregamento AJAX --- */
+.resultados-wrap { position: relative; transition: opacity var(--transicao); }
+
+.resultados-wrap.carregando { opacity: 0.45; pointer-events: none; }
+
+.resultados-wrap.carregando::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--azul-claro), transparent);
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  animation: carregandoLinha 0.9s linear infinite;
+  z-index: 4;
+}
+
+@keyframes carregandoLinha {
+  from { background-position: -40% 0; }
+  to { background-position: 140% 0; }
+}
+
+.grid-produtos .card-produto { animation: surgir 0.35s ease both; }
+
+/* --------------------------------------------------------- Página do produto */
+.produto-detalhe .caminho { margin-bottom: 1rem; }
+
+.produto-info .selo-demo-produto {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--azul-gelo);
+  color: var(--azul);
+  border: 1px dashed var(--azul-claro);
+  border-radius: 999px;
+  padding: 0.32rem 0.85rem;
+  margin-bottom: 0.9rem;
+}
+
+.produto-info .p-descricao {
+  color: var(--texto);
+  line-height: 1.75;
+  font-size: 0.95rem;
+  white-space: pre-line;
+  margin-bottom: 1.4rem;
+}
+
+/* Informações de entrega em lista premium */
+.entrega-info .linha-entrega {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.35rem 0;
+}
+
+.entrega-info .linha-entrega i {
+  color: var(--azul);
+  font-size: 1.05rem;
+  margin-top: 0.1rem;
+}
+
+.entrega-info .linha-entrega strong { color: var(--tinta); display: block; font-size: 0.87rem; }
+.entrega-info .linha-entrega span { color: var(--texto-suave); font-size: 0.82rem; }
+
+/* Galeria: indicador de ampliação e troca suave de imagem */
+.galeria-principal { cursor: zoom-in; position: relative; border-radius: var(--raio); }
+.galeria-principal.zoom-ativo { cursor: zoom-out; }
+
+.galeria-principal img {
+  transition: opacity 0.32s ease, transform 0.3s ease;
+}
+
+.galeria-principal img.img-trocando { opacity: 0; }
+
+.galeria-principal .lente-zoom {
+  position: absolute;
+  right: 0.9rem;
+  bottom: 0.9rem;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--azul);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--sombra-card);
+  pointer-events: none;
+  transition: opacity var(--transicao);
+  z-index: 3;
+}
+
+.galeria-principal.zoom-ativo .lente-zoom { opacity: 0; }
+
+.miniaturas .miniatura {
+  transition: transform var(--transicao), border-color var(--transicao);
+}
+
+.miniaturas .miniatura:hover { transform: translateY(-3px); }
+
+/* Seletor de quantidade e ações */
+.linha-acoes-produto .btn-add-principal {
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------- Produtos relacionados */
+.secao-relacionados { margin-top: 3.5rem; }
+
+.secao-relacionados .secao-titulo { font-size: clamp(1.3rem, 2.4vw, 1.7rem); }
+
+/* ------------------------------------------------------------- Responsividade */
+@media (max-width: 991.98px) {
+  .btn-filtros-mobile {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 1rem;
+    border: 1.5px solid var(--azul);
+    background: #fff;
+    color: var(--azul);
+    border-radius: 999px;
+    padding: 0.75rem 1.2rem;
+    font-weight: 600;
+    font-size: 0.86rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .filtros {
+    display: none;
+    margin-bottom: 1.5rem;
+    animation: surgir 0.25s ease;
+  }
+
+  .filtros.aberto { display: block; }
+}
+
+@media (max-width: 767.98px) {
+  .pagina-catalogo .cabecalho-pagina { padding: 1.5rem 1.3rem; }
+  .produto-info h1 { font-size: clamp(1.5rem, 7vw, 1.9rem); }
+  .p-preco-valor { font-size: 1.6rem; }
+  .galeria-principal .lente-zoom { width: 36px; height: 36px; right: 0.6rem; bottom: 0.6rem; }
+  .linha-acoes-produto .btn-add-principal { min-width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid-produtos .card-produto { animation: none; }
+  .resultados-wrap.carregando::after { animation: none; }
+}

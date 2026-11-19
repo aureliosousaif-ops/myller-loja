@@ -1,0 +1,55 @@
+{% extends "dashboard/base_painel.html" %}
+
+{% block titulo %}Newsletter{% endblock %}
+{% block topo_titulo %}Newsletter{% endblock %}
+{% block topo_subtitulo %}Inscritos na lista de novidades da loja{% endblock %}
+
+{% block conteudo %}
+<section class="painel-cartao">
+  <div class="painel-cartao-topo">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <h3>Inscritos</h3>
+      <span class="kpi-detalhe">{{ inscritos|length }} inscrito(s) — exibindo até 300</span>
+    </div>
+  </div>
+
+  <div class="painel-cartao-corpo sem-padding">
+    <table class="tabela-painel">
+      <thead>
+        <tr>
+          <th>E-mail</th>
+          <th>Nome</th>
+          <th>Origem</th>
+          <th>Inscrito em</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in inscritos %}
+        <tr>
+          <td><strong>{{ i.email }}</strong></td>
+          <td>{{ i.nome|default:"—" }}</td>
+          <td>{{ i.origem|default:"site" }}</td>
+          <td>{{ i.criado_em|date:"d/m/Y H:i" }}</td>
+          <td>
+            <span class="badge-status {% if i.ativo %}bs-ativo{% else %}bs-inativo{% endif %}">
+              {% if i.ativo %}Ativo{% else %}Inativo{% endif %}
+            </span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5">
+            <div class="estado-vazio">
+              <i class="bi bi-envelope-paper"></i>
+              <h4>Nenhum inscrito</h4>
+              <p>Quando alguém assinar a newsletter na loja, o cadastro aparecerá aqui.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

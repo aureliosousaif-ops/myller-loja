@@ -1,0 +1,57 @@
+# ------------------------------------------------------------
+# MYLLER — arquivo ignorado pelo Git
+# ------------------------------------------------------------
+
+# Segredos — nunca versionar
+.env
+.env.*
+!.env.example
+
+# Banco de dados de desenvolvimento
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+*.sqlite3-journal
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Arquivos gerados em execução
+staticfiles/
+testes_stdout.txt
+testes_stderr.txt
+t_out.txt
+t_err.txt
+*.log
+logs/
+
+# Backups e arquivos temporários (podem conter dados de clientes)
+*.bak
+*.backup
+*_backup*/
+*_backup*.zip
+*_backup*.7z
+*.zip
+*.7z
+dump*.sql
+pg_dump*
+
+# Cobertura/testes
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Observação: media/ (imagens demo de produtos/categorias) é VERSIONADO
+# de propósito — sem ela a loja publicada ficaria sem fotos. Revise com
+# cuidado `git status` antes de commitar novos uploads feitos no painel.

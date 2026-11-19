@@ -1,0 +1,70 @@
+{% extends "dashboard/base_painel.html" %}
+
+{% block titulo %}Pedidos{% endblock %}
+{% block topo_titulo %}Pedidos{% endblock %}
+{% block topo_subtitulo %}Acompanhe os pedidos da loja, do pagamento à entrega{% endblock %}
+
+{% block conteudo %}
+<section class="painel-cartao">
+  <div class="painel-cartao-topo">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <h3>Pedidos</h3>
+      <span class="kpi-detalhe">{{ pedidos|length }} pedido(s) — exibindo até 200</span>
+    </div>
+    <form method="get" action="{% url 'dashboard:pedidos' %}" class="barra-filtros">
+      <input type="search" name="q" value="{{ termo }}" class="form-control" placeholder="Número, nome ou e-mail" aria-label="Buscar pedido">
+      <select name="status" class="form-select" aria-label="Filtrar por status">
+        <option value="">Todos os status</option>
+        {% for valor, rotulo in status_choices %}
+        <option value="{{ valor }}" {% if status_filtro == valor %}selected{% endif %}>{{ rotulo }}</option>
+        {% endfor %}
+      </select>
+      <input type="date" name="inicio" value="{{ data_inicio }}" class="form-control" aria-label="Data inicial">
+      <input type="date" name="fim" value="{{ data_fim }}" class="form-control" aria-label="Data final">
+      <button type="submit" class="btn-painel btn-pequeno">Filtrar</button>
+      <a href="{% url 'dashboard:pedidos' %}" class="btn-painel btn-secundario btn-pequeno">Limpar</a>
+    </form>
+  </div>
+
+  <div class="painel-cartao-corpo sem-padding">
+    <table class="tabela-painel">
+      <thead>
+        <tr>
+          <th>Pedido</th>
+          <th>Data</th>
+          <th>Cliente</th>
+          <th class="num">Itens</th>
+          <th class="num">Total</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pedidos %}
+        <tr>
+          <td><a href="{% url 'dashboard:pedido_detalhe' p.numero %}"><strong>{{ p.numero }}</strong></a></td>
+          <td>{{ p.criado_em|date:"d/m/Y H:i" }}</td>
+          <td>
+            {{ p.nome }}
+            <div class="mini-sku">{{ p.email }}</div>
+          </td>
+          <td class="num">{{ p.total_itens }}</td>
+          <td class="num">R$ {{ p.total|floatformat:2 }}</td>
+          <td><span class="badge-status bs-{{ p.status }}">{{ p.get_status_display }}</span></td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6">
+            <div class="estado-vazio">
+              <i class="bi bi-search"></i>
+              <h4>Nenhum pedido encontrado</h4>
+              <p>Nenhum pedido corresponde aos filtros aplicados. Ajuste a busca, o status ou o período.</p>
+              <a href="{% url 'dashboard:pedidos' %}" class="btn-painel">Limpar filtros</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

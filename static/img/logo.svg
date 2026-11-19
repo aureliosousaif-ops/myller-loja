@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 76" role="img" aria-label="MYLLER">
+  <defs>
+    <linearGradient id="gradM" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#275B85"/>
+      <stop offset="100%" stop-color="#1C4463"/>
+    </linearGradient>
+  </defs>
+  <!-- Marca (monograma M) -->
+  <rect x="4" y="8" width="60" height="60" rx="14" fill="url(#gradM)"/>
+  <path d="M19 52 V30 L34 44 L49 30 V52" fill="none" stroke="#FFFFFF" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="52" cy="24" r="4" fill="#95C2DF"/>
+  <!-- Logotipo -->
+  <text x="80" y="50" font-family="Jost, Futura, 'Century Gothic', Arial, sans-serif" font-size="34" font-weight="500" letter-spacing="7" fill="#275B85">MYLLER</text>
+  <rect x="81" y="58" width="204" height="2" rx="1" fill="#C0B7A6"/>
+</svg>

@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Carrinho de compras — {{ loja.nome_loja }}{% endblock %}
+
+{% block conteudo %}
+<div class="carrinho-pagina">
+  <div class="container">
+
+    <nav class="caminho" aria-label="Navegação estrutural">
+      <a href="{% url 'core:home' %}">Início</a>
+      <i class="bi bi-chevron-right mx-1"></i> Carrinho
+    </nav>
+
+    <div class="cabecalho-pagina">
+      <div class="secao-selo">Sua sacola</div>
+      <h1 class="secao-titulo">Carrinho de compras</h1>
+    </div>
+
+    {% if not carrinho or not carrinho.itens.exists %}
+      <div class="carrinho-vazio">
+        <div class="icone"><i class="bi bi-bag"></i></div>
+        <h2>Seu carrinho está vazio</h2>
+        <p class="text-muted">Explore o catálogo e adicione suas peças favoritas.</p>
+        <a href="{% url 'produtos:lista' %}" class="btn-myller mt-2">Ver produtos</a>
+      </div>
+    {% else %}
+
+      <div class="layout-carrinho">
+        <!-- ================= Itens ================= -->
+        <div>
+          {% for item in carrinho.itens_ativos %}
+            <div class="item-carrinho" data-item="{{ item.pk }}">
+              <div class="item-img">
+                {% if item.variacao.produto.imagem_principal %}
+                  <a href="{{ item.variacao.produto.get_absolute_url }}">
+                    <img src="{{ item.variacao.produto.imagem_principal.url }}" alt="{{ item.variacao.produto.nome }}">
+                  </a>
+                {% else %}
+                  <a href="{{ item.variacao.produto.get_absolute_url }}">
+                    <img src="{% static 'img/placeholder-produto.svg' %}" alt="{{ item.variacao.produto.nome }}">
+                  </a>
+                {% endif %}
+              </div>
+
+              <div>
+                <p class="item-nome">
+                  <a href="{{ item.variacao.produto.get_absolute_url }}">{{ item.variacao.produto.nome }}</a>
+                </p>
+                <div class="item-variacoes">
+                  <span><i class="bi bi-rulers me-1"></i>{{ item.variacao.tamanho.nome }}</span>
+                  <span><i class="bi bi-palette me-1"></i>{{ item.variacao.cor.nome }}</span>
+                  <span class="item-preco-unit">un. R$ {{ item.preco_unitario|floatformat:2 }}</span>
+                </div>
+                {% if item.variacao.estoque <= 3 %}
+                  <div class="aviso-estoque escasso mt-2" style="font-size:0.76rem">
+                    <i class="bi bi-exclamation-circle"></i> Últimas unidades: {{ item.variacao.estoque }} disponíveis
+                  </div>
+                {% endif %}
+              </div>
+
+              <form method="post" action="{% url 'carrinho:atualizar' %}" class="form-item-carrinho">
+                {% csrf_token %}
+                <input type="hidden" name="item_id" value="{{ item.pk }}">
+                <input type="hidden" name="quantidade" value="{{ item.quantidade }}" class="qtd-valor">
+                <div class="qtd-mini">
+                  <button type="submit" name="acao" value="diminuir" aria-label="Diminuir quantidade"
+                          {% if item.quantidade <= 1 %}disabled{% endif %}>−</button>
+                  <span class="qtd-atual">{{ item.quantidade }}</span>
+                  <button type="submit" name="acao" value="aumentar" aria-label="Aumentar quantidade"
+                          {% if item.quantidade >= item.variacao.estoque %}disabled{% endif %}>+</button>
+                </div>
+              </form>
+
+              <span class="item-total">R$ {{ item.total|floatformat:2 }}</span>
+
+              <form method="post" action="{% url 'carrinho:remover' %}">
+                {% csrf_token %}
+                <input type="hidden" name="item_id" value="{{ item.pk }}">
+                <button type="submit" class="item-remover" title="Remover item" aria-label="Remover item">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </form>
+            </div>
+          {% endfor %}
+
+          <div class="d-flex justify-content-between mt-3 flex-wrap gap-2">
+            <a href="{% url 'produtos:lista' %}" class="btn-outline-myller btn btn-pequeno">
+              <i class="bi bi-arrow-left"></i> Continuar comprando
+            </a>
+          </div>
+        </div>
+
+        <!-- ================= Resumo ================= -->
+        <aside class="resumo-pedido" id="resumoPedido">
+          <h5>Resumo do pedido</h5>
+
+          <div class="linha-resumo"><span>Subtotal</span><span id="resumoSubtotal">R$ {{ totais.subtotal|floatformat:2 }}</span></div>
+          {% if totais.desconto %}
+            <div class="linha-resumo desconto">
+              <span>Desconto ({{ totais.cupom.codigo }})</span>
+              <span id="resumoDesconto">- R$ {{ totais.desconto|floatformat:2 }}</span>
+            </div>
+          {% else %}
+            <div class="linha-resumo desconto" id="linhaDesconto" style="display:none"><span>Desconto</span><span id="resumoDesconto"></span></div>
+          {% endif %}
+          <div class="linha-resumo">
+            <span>Frete</span>
+            <span id="resumoFrete">{% if frete_info.valor %}R$ {{ frete_info.valor }}{% else %}Calcular{% endif %}</span>
+          </div>
+          <div class="linha-total"><span>Total</span><span class="valor" id="resumoTotal">R$ {{ totais.total|floatformat:2 }}</span></div>
+          <p class="preco-parcela mt-2 mb-0">ou 3x de R$ {{ totais.total|floatformat:2 }} sem juros</p>
+
+          <!-- Cálculo de frete -->
+          <div class="box-frete mt-3">
+            <div class="linha-frete">
+              <input type="text" class="form-control" id="cepFrete" placeholder="Calcular frete — CEP"
+                     maxlength="9" value="{{ frete_info.cep|default:'' }}" style="font-size:0.87rem">
+              <button type="button" class="btn-myller btn-pequeno" id="btnCalcularFrete">Calcular</button>
+            </div>
+            <div class="resultado-frete" id="resultadoFrete" {% if not frete_info %}style="display:none"{% endif %}>
+              {% if frete_info %}
+                <div class="opcao-frete">
+                  <span><i class="bi bi-truck me-1"></i>{{ frete_info.transportadora }}</span>
+                  <strong>R$ {{ frete_info.valor }}</strong>
+                </div>
+                <span class="nota-frete">{{ frete_info.prazo }} · {{ frete_info.mensagem }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Cupom -->
+          <form method="post" action="{% url 'carrinho:cupom' %}" class="form-cupom">
+            {% csrf_token %}
+            <input type="text" name="codigo" class="form-control" placeholder="Cupom de desconto"
+                   value="{{ carrinho.cupom_codigo }}" style="font-size:0.87rem;text-transform:uppercase">
+            <button type="submit" class="btn-outline-myller btn btn-pequeno">OK</button>
+          </form>
+
+          <a href="{% url 'pedidos:checkout' %}" class="btn-myller w-100 mt-3" style="padding:0.95rem">
+            Finalizar compra <i class="bi bi-arrow-right"></i>
+          </a>
+
+          <p class="preco-parcela text-center mt-3 mb-0">
+            <i class="bi bi-lock me-1"></i> Ambiente seguro e criptografado
+          </p>
+        </aside>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

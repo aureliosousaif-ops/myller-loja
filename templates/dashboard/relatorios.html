@@ -1,0 +1,224 @@
+{% extends "dashboard/base_painel.html" %}
+{% load humanize %}
+
+{% block titulo %}Relatórios{% endblock %}
+{% block topo_titulo %}Relatórios{% endblock %}
+{% block topo_subtitulo %}Vendas, faturamento e atividade administrativa por período{% endblock %}
+
+{% block conteudo %}
+<section class="painel-cartao mb-3">
+  <div class="painel-cartao-topo">
+    <h3>Período do relatório</h3>
+    <form method="get" action="{% url 'dashboard:relatorios' %}" class="barra-filtros">
+      <input type="date" name="inicio" value="{{ data_inicio }}" class="form-control" aria-label="Data inicial">
+      <input type="date" name="fim" value="{{ data_fim }}" class="form-control" aria-label="Data final">
+      <button type="submit" class="btn-painel btn-pequeno"><i class="bi bi-funnel"></i> Aplicar</button>
+      <a href="{% url 'dashboard:relatorios' %}?formato=csv&inicio={{ data_inicio }}&fim={{ data_fim }}"
+         class="btn-painel btn-secundario btn-pequeno">
+        <i class="bi bi-download"></i> Exportar CSV
+      </a>
+      <a href="{% url 'dashboard:newsletter' %}" class="btn-painel btn-secundario btn-pequeno">
+        <i class="bi bi-envelope-paper"></i> Newsletter
+      </a>
+    </form>
+  </div>
+</section>
+
+<!-- =============================== KPIs do período =============================== -->
+<div class="grade-kpi">
+  <div class="cartao-kpi">
+    <div class="kpi-icone verde"><i class="bi bi-currency-dollar"></i></div>
+    <div>
+      <div class="kpi-rotulo">Faturamento</div>
+      <div class="kpi-valor">R$ {{ kpi.faturamento|floatformat:2 }}</div>
+      <div class="kpi-detalhe">pedidos não cancelados no período</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone verde"><i class="bi bi-bag-check"></i></div>
+    <div>
+      <div class="kpi-rotulo">Vendas</div>
+      <div class="kpi-valor">{{ kpi.qtd_vendas }}</div>
+      <div class="kpi-detalhe">pedidos não cancelados</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone bege"><i class="bi bi-receipt"></i></div>
+    <div>
+      <div class="kpi-rotulo">Ticket médio</div>
+      <div class="kpi-valor">R$ {{ kpi.ticket_medio|floatformat:2 }}</div>
+      <div class="kpi-detalhe">valor médio por venda</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone"><i class="bi bi-boxes"></i></div>
+    <div>
+      <div class="kpi-rotulo">Pedidos no período</div>
+      <div class="kpi-valor">{{ kpi.total_pedidos }}</div>
+      <div class="kpi-detalhe">inclui cancelados ({{ kpi.cancelados }})</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone"><i class="bi bi-people"></i></div>
+    <div>
+      <div class="kpi-rotulo">Novos clientes</div>
+      <div class="kpi-valor">{{ kpi.novos_clientes }}</div>
+      <div class="kpi-detalhe">contas criadas no período</div>
+    </div>
+  </div>
+
+  <div class="cartao-kpi">
+    <div class="kpi-icone ambar"><i class="bi bi-trophy"></i></div>
+    <div>
+      <div class="kpi-rotulo">Maior pedido</div>
+      <div class="kpi-valor">R$ {{ kpi.maior_pedido|floatformat:2 }}</div>
+      <div class="kpi-detalhe">maior venda do período</div>
+    </div>
+  </div>
+</div>
+
+<!-- =============================== Vendas por dia =============================== -->
+<section class="painel-cartao mb-3">
+  <div class="painel-cartao-topo">
+    <h3>Vendas por dia — {{ periodo_rotulo }}</h3>
+    <span class="kpi-detalhe">{{ serie|length }} dia(s)</span>
+  </div>
+  <div class="painel-cartao-corpo">
+    <div class="grafico-barras">
+      {% for item in serie %}
+      <div class="barra">
+        <span class="coluna" style="height: {{ item.pct }}%" data-valor="{{ item.qtd }} pedido(s) — R$ {{ item.total|floatformat:2 }}"></span>
+        <span class="rotulo">{{ item.label }}</span>
+      </div>
+      {% empty %}
+      <div class="estado-vazio w-100">
+        <i class="bi bi-bar-chart"></i>
+        <h4>Sem dados no período</h4>
+        <p>Ajuste as datas para ver as vendas registradas.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<div class="grade-duas">
+  <!-- ====================== Produtos mais vendidos ====================== -->
+  <section class="painel-cartao">
+    <div class="painel-cartao-topo">
+      <h3>Produtos mais vendidos</h3>
+    </div>
+    <div class="painel-cartao-corpo sem-padding">
+      <table class="tabela-painel">
+        <thead>
+          <tr>
+            <th style="width: 48px">#</th>
+            <th>Produto</th>
+            <th class="num">Vendidos</th>
+            <th class="num">Preço</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in top_produtos %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+              <div class="mini-produto">
+                <div class="mini-img">
+                  {% if p.imagem_principal %}<img src="{{ p.imagem_principal.url }}" alt="{{ p.nome }}">{% else %}<i class="bi bi-image"></i>{% endif %}
+                </div>
+                <div>
+                  <a class="mini-nome" href="{% url 'dashboard:produto_editar' p.pk %}">{{ p.nome }}</a>
+                  <div class="mini-sku">{{ p.sku }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="num"><strong>{{ p.vendidos }}</strong></td>
+            <td class="num">R$ {{ p.preco_final|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4">
+              <div class="estado-vazio">
+                <i class="bi bi-bar-chart"></i>
+                <h4>Sem vendas no período</h4>
+                <p>Os produtos vendidos entre as datas aparecerão aqui.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ====================== Distribuição por status ====================== -->
+  <section class="painel-cartao">
+    <div class="painel-cartao-topo">
+      <h3>Pedidos por status</h3>
+    </div>
+    <div class="painel-cartao-corpo">
+      <div class="grade-status">
+        {% for item in serie_status %}
+        <div class="item-status">
+          <div class="item-status-topo">
+            <span class="badge-status bs-{{ item.valor }}">{{ item.rotulo }}</span>
+            <span class="kpi-detalhe"><strong>{{ item.qtd }}</strong> · {{ item.pct }}%</span>
+          </div>
+          <div class="barra-progresso-lista">
+            <span style="width: {{ item.pct }}%"></span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ====================== Atividade administrativa ====================== -->
+<section class="painel-cartao">
+  <div class="painel-cartao-topo">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <h3>Atividade administrativa</h3>
+      <span class="kpi-detalhe">{{ acoes|length }} última(s) ação(ões) — trilha de auditoria do painel</span>
+    </div>
+  </div>
+  <div class="painel-cartao-corpo sem-padding">
+    <table class="tabela-painel">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Ação</th>
+          <th>Objeto</th>
+          <th>Detalhes</th>
+          <th>Usuário</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in acoes %}
+        <tr>
+          <td>{{ a.criado_em|date:"d/m/Y H:i" }}</td>
+          <td><strong>{{ a.acao }}</strong></td>
+          <td>{{ a.objeto|default:"—" }}</td>
+          <td class="mini-sku">{{ a.detalhes|default:"—" }}</td>
+          <td>{{ a.usuario.username|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5">
+            <div class="estado-vazio">
+              <i class="bi bi-clock-history"></i>
+              <h4>Nenhuma ação registrada</h4>
+              <p>As ações administrativas importantes realizadas no painel aparecerão aqui.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
